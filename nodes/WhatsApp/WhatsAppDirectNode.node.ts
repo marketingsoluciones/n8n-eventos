@@ -4,6 +4,7 @@ import {
   INodeType,
   INodeTypeDescription,
   NodeOperationError,
+  
 } from 'n8n-workflow';
 
 export class WhatsAppDirectNode implements INodeType {
