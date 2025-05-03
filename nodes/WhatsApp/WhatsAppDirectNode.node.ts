@@ -12,6 +12,7 @@ export class WhatsAppDirectNode implements INodeType {
     displayName: 'WhatsApp Direct',
     name: 'whatsAppDirect',
     icon: 'file:whatsapp.svg',
+  
     group: ['output'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
