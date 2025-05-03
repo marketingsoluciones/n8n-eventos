@@ -4,7 +4,7 @@ import {
   INodeTypeDescription,
   ITriggerResponse,
   IWebhookResponseData,
-  icon: 'file:whatsapp.svg',  
+
 } from 'n8n-workflow';
 
 export class WhatsAppDirectTrigger implements INodeType {
