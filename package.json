@@ -9,7 +9,7 @@
   "homepage": "",
   "author": {
     "name": "Marketing Soluciones",
-    "email": ""
+    "email": "carlos.carrillo@recargaexpress.com"
   },
   "repository": {
     "type": "git",
@@ -33,8 +33,8 @@
       "dist/credentials/WhatsAppApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/WhatsApp/WhatsAppDirectNode.node.js",
-      "dist/nodes/WhatsApp/WhatsAppDirectTrigger.node.js"
+      "dist/WhatsApp/WhatsAppDirectNode.node.js",
+      "dist/WhatsApp/WhatsAppDirectTrigger.node.js"
     ]
   },
   "devDependencies": {
