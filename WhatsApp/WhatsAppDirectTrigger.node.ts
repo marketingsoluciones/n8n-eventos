@@ -65,7 +65,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       },
     ],
   };
-async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+async webhook(this: ITriggerFunctions): Promise<IWebhookResponseData> {
     const req = this.getRequestObject();
     const authentication = this.getNodeParameter('authentication') as string;
 
