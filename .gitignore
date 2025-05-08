@@ -1,0 +1,12 @@
+# Carpetas de compilación
+dist/
+
+# Dependencias
+node_modules/
+
+# Archivos de logs
+*.log
+
+# Otros archivos que deberías ignorar
+.DS_Store
+.env
