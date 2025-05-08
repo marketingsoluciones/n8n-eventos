@@ -1,13 +1,8 @@
-import { ITriggerFunctions } from 'n8n-core';
 import {
- IExecuteFunctions,
-  INodeExecutionData,
   INodeType,
   INodeTypeDescription,
-  ITriggerResponse,
+  IWebhookFunctions,
   IWebhookResponseData,
- IWebhookFunctions,
-
 } from 'n8n-workflow';
 
 export class WhatsAppDirectTrigger implements INodeType {
@@ -65,7 +60,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       },
     ],
   };
-async webhook(this: ITriggerFunctions): Promise<IWebhookResponseData> {
+async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     const req = this.getRequestObject();
     const authentication = this.getNodeParameter('authentication') as string;
 
