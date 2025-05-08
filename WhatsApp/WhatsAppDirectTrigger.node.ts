@@ -1,5 +1,8 @@
 import { ITriggerFunctions } from 'n8n-core';
 import {
+ IExecuteFunctions,
+  INodeExecutionData,
+
   INodeType,
   INodeTypeDescription,
   ITriggerResponse,
