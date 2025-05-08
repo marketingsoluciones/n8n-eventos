@@ -6,6 +6,7 @@ import {
   INodeTypeDescription,
   ITriggerResponse,
   IWebhookResponseData,
+ IWebhookFunctions,
 
 } from 'n8n-workflow';
 
