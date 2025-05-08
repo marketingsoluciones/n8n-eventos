@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2019",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "lib": ["es2019", "es2020"],
+    "declaration": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
