@@ -108,7 +108,7 @@ if (mode === 'subscribe' && token && challenge) {
       body: data,
     },
   };
-  };
+  
 }    
     // Si no es una solicitud de verificación pero es GET
     return {
