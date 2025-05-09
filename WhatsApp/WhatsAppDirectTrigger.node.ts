@@ -1,7 +1,10 @@
 import {
+  IExecuteFunctions,
+  IWebhookFunctions,
+  INodeExecutionData,
   INodeType,
   INodeTypeDescription,
-  IWebhookFunctions,
+  ITriggerResponse,
   IWebhookResponseData,
 } from 'n8n-workflow';
 
