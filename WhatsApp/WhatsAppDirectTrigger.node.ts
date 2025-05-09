@@ -99,6 +99,10 @@ if (mode === 'subscribe' && token && challenge) {
     webhookResponse: {
       statusCode: 200,
       body: challenge,
+       headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: challenge,
     },
   };
 }    
