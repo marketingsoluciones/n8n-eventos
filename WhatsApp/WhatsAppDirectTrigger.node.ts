@@ -101,7 +101,8 @@ if (mode === 'subscribe' && token && challenge) {
        headers: {
         'Content-Type': 'text/plain',
       },
-      body: challenge,
+         responseMode: 'responseNode',
+      respondWithData: challenge, 
     },
   };
 }    
