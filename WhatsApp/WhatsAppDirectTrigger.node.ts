@@ -91,24 +91,45 @@ if (req.method === 'GET') {
     challenge,
   });
 
-// Si es una solicitud de verificación
-if (challenge) {   
+  // Si es una solicitud de verificación
+  if (mode === 'subscribe' && challenge) {
+    console.log('Respondiendo con el challenge:', challenge);
+    
+    try {
+      // Acceder directamente al objeto de respuesta
+      const res = this.getResponseObject();
+      
+      // Configurar headers para texto plano
+      res.setHeader('Content-Type', 'text/plain');
+      
+      // Enviar el challenge como texto plano sin formato JSON
+      res.end(challenge as string);
+      
+      // Indicar a n8n que no procese más esta respuesta
+      return {
+        noWebhookResponse: true,
+      };
+    } catch (error) {
+      console.error('Error al enviar respuesta directa:', error);
+      
+      // Fallback si falla el método directo
+      return {
+        webhookResponse: {
+          statusCode: 200,
+          body: challenge,
+        },
+      };
+    }
+  }
+  
+  // Si no es una solicitud de verificación pero es GET
   return {
     webhookResponse: {
-      statusCode: 200,
-      body: challenge,
+      statusCode: 400,
+      body: 'Bad Request - Invalid GET request',
     },
   };
-    } else {  // Si no es una solicitud de verificación pero es GET
-    return {
-      webhookResponse: {
-        statusCode: 400,
-        body: 'Bad Request - Invalid GET request',
-      },
-    };
-  }
- }
-    
+}    
     // El resto del código se mantiene igual para manejar solicitudes POST
   const authentication = this.getNodeParameter('authentication') as string;
 
