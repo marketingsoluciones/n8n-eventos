@@ -98,7 +98,6 @@ if (mode === 'subscribe' && token && challenge) {
   return {
     webhookResponse: {
       statusCode: 200,
-      body: challenge,
        headers: {
         'Content-Type': 'text/plain',
       },
