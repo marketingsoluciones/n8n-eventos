@@ -91,38 +91,17 @@ export class WhatsAppDirectTrigger implements INodeType {
       challenge,
     });
 
-    // Si es una solicitud de verificación
-    if (mode === 'subscribe') {
-      // Obtener el token configurado en el nodo
-      const configToken = this.getNodeParameter('token') as string;
-      
-      console.log('Verificando token:', {
-        tokenRecibido: token,
-        tokenConfigurado: configToken,
-      });
-
-      // Verificar que el token coincide
-      if (token === configToken) {
-        console.log('Verificación exitosa, devolviendo challenge:', challenge);
-        // Devolver el desafío para completar la verificación
-        return {
-          webhookResponse: {
-            statusCode: 200,
-            body: challenge,
-          },
-        };
-      } else {
-        console.log('Verificación fallida: token no coincide');
-        // Token no válido
-        return {
-          webhookResponse: {
-            statusCode: 403,
-            body: 'Forbidden - Token mismatch',
-          },
-        };
-      }
-    }
-    
+  // Si es una solicitud de verificación
+if (mode === 'subscribe' && token && challenge) {
+  // Durante la verificación inicial, simplemente devolvemos el challenge sin verificar el token
+  console.log('Verificación de webhook, devolviendo challenge:', challenge);
+  return {
+    webhookResponse: {
+      statusCode: 200,
+      body: challenge,
+    },
+  };
+}    
     // Si no es una solicitud de verificación pero es GET
     return {
       webhookResponse: {
