@@ -92,26 +92,12 @@ export class WhatsAppDirectTrigger implements INodeType {
     });
 
   // Si es una solicitud de verificación
-if (mode === 'subscribe' && token && challenge) {
-  // Durante la verificación inicial, simplemente devolvemos el challenge sin verificar el token
-  console.log('Verificación de webhook, devolviendo challenge:', challenge);
-
-    const data = Buffer.from(challenge as string);
-  
-  return {
+   return {
     webhookResponse: {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'text/plain',
-      
-      },
-      
-      __raw: challenge,  // Este es el formato especial que n8n usa para texto pl  
-      },
-  };
-  
-}    
-    // Si no es una solicitud de verificación pero es GET
+      body: challenge,
+    },
+  };    // Si no es una solicitud de verificación pero es GET
     return {
       webhookResponse: {
         statusCode: 400,
