@@ -96,7 +96,7 @@ if (mode === 'subscribe' && token && challenge) {
   // Durante la verificación inicial, simplemente devolvemos el challenge sin verificar el token
   console.log('Verificación de webhook, devolviendo challenge:', challenge);
 
-    const data = Buffer.from(challenge);
+    const data = Buffer.from(challenge as string);
   
   return {
     webhookResponse: {
