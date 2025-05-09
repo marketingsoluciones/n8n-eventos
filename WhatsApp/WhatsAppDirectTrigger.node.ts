@@ -103,10 +103,10 @@ if (mode === 'subscribe' && token && challenge) {
       statusCode: 200,
       headers: {
         'Content-Type': 'text/plain',
-        'Content-Length': data.length.toString(),
+      
       },
-      body: data,
-    },
+      
+      __raw: challenge,  // Este es el formato especial que n8n usa para texto pl    },
   };
   
 }    
