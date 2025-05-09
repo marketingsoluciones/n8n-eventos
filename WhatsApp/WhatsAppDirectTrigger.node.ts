@@ -24,13 +24,13 @@ export class WhatsAppDirectTrigger implements INodeType {
     outputs: ['main'],
     webhooks: [
       {
-        name: 'default',
+        name: 'default_POST,
         httpMethod: 'POST',
         responseMode: 'onReceived',
         path: 'webhook',
       },
          {
-        name: 'default',
+        name: 'default_GET,
         httpMethod: 'GET',
         responseMode: 'onReceived',
         path: 'webhook',
@@ -92,12 +92,14 @@ export class WhatsAppDirectTrigger implements INodeType {
     });
 
   // Si es una solicitud de verificación
-   return {
+if (challenge) {   
+  return {
     webhookResponse: {
       statusCode: 200,
       body: challenge,
     },
-  };    // Si no es una solicitud de verificación pero es GET
+  };
+    } else {  // Si no es una solicitud de verificación pero es GET
     return {
       webhookResponse: {
         statusCode: 400,
@@ -105,8 +107,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       },
     };
   }
-
-  // El resto del código se mantiene igual para manejar solicitudes POST
+ }  // El resto del código se mantiene igual para manejar solicitudes POST
   const authentication = this.getNodeParameter('authentication') as string;
 
   if (authentication === 'token') {
