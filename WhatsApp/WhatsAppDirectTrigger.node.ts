@@ -106,7 +106,8 @@ if (mode === 'subscribe' && token && challenge) {
       
       },
       
-      __raw: challenge,  // Este es el formato especial que n8n usa para texto pl    },
+      __raw: challenge,  // Este es el formato especial que n8n usa para texto pl  
+      },
   };
   
 }    
