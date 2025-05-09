@@ -24,13 +24,13 @@ export class WhatsAppDirectTrigger implements INodeType {
     outputs: ['main'],
     webhooks: [
       {
-        name: 'default_POST,
+        name: 'default_POST',
         httpMethod: 'POST',
         responseMode: 'onReceived',
         path: 'webhook',
       },
          {
-        name: 'default_GET,
+        name: 'default_GET',
         httpMethod: 'GET',
         responseMode: 'onReceived',
         path: 'webhook',
@@ -79,19 +79,19 @@ export class WhatsAppDirectTrigger implements INodeType {
     headers: req.headers,
   });
 
-  // Manejar solicitudes GET (verificación de webhook de Facebook/Meta)
-  if (req.method === 'GET') {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    
-    console.log('Solicitud de verificación de webhook:', {
-      mode,
-      token,
-      challenge,
-    });
+// Manejar solicitudes GET (verificación de webhook de Facebook/Meta)
+if (req.method === 'GET') {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+  
+  console.log('Solicitud de verificación de webhook:', {
+    mode,
+    token,
+    challenge,
+  });
 
-  // Si es una solicitud de verificación
+// Si es una solicitud de verificación
 if (challenge) {   
   return {
     webhookResponse: {
@@ -107,7 +107,9 @@ if (challenge) {
       },
     };
   }
- }  // El resto del código se mantiene igual para manejar solicitudes POST
+ }
+    
+    // El resto del código se mantiene igual para manejar solicitudes POST
   const authentication = this.getNodeParameter('authentication') as string;
 
   if (authentication === 'token') {
