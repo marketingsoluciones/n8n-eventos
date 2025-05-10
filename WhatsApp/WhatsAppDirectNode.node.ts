@@ -54,14 +54,18 @@ export class WhatsAppDirectNode implements INodeType {
             resource: ['message'],
           },
         },
-        options: [
-          {
-            name: 'Send',
-            value: 'send',
-            description: 'Send a WhatsApp message',
-          },
-        ],
-        default: 'send',
+       options: [
+  {
+    name: 'Send Text',
+    value: 'sendText',
+    description: 'Send a text message',
+  },
+  {
+    name: 'Send Template',
+    value: 'sendTemplate',
+    description: 'Send a template message',
+  },
+],        default: 'send',
       },
       {
         displayName: 'Phone Number',
@@ -93,53 +97,108 @@ export class WhatsAppDirectNode implements INodeType {
       },
     ],
   };
+async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+  const items = this.getInputData();
+  const returnData: INodeExecutionData[] = [];
+  const resource = this.getNodeParameter('resource', 0) as string;
+  const operation = this.getNodeParameter('operation', 0) as string;
+  
+  // Obtener credenciales
+  const credentials = await this.getCredentials('whatsAppApi');
+  const apiUrl = credentials.apiUrl as string;
+  const phoneNumberId = credentials.phoneNumberId as string;
 
-  async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-    const items = this.getInputData();
-    const returnData: INodeExecutionData[] = [];
-    const resource = this.getNodeParameter('resource', 0) as string;
-    const operation = this.getNodeParameter('operation', 0) as string;
+  // Implementación para enviar mensajes de WhatsApp
+  if (resource === 'message') {
+    try {
+      for (let i = 0; i < items.length; i++) {
+        const phoneNumber = this.getNodeParameter('phoneNumber', i) as string;
+        
+        // Preparar opciones de solicitud HTTP
+        const options: IHttpRequestOptions = {
+          url: `${apiUrl}/${phoneNumberId}/messages`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {},
+        };
 
-    // Implementation for sending WhatsApp messages
-    if (resource === 'message' && operation === 'send') {
-      try {
-        for (let i = 0; i < items.length; i++) {
-          const phoneNumber = this.getNodeParameter('phoneNumber', i) as string;
+        // Construir el cuerpo de la solicitud según la operación
+        if (operation === 'sendText') {
           const messageText = this.getNodeParameter('messageText', i) as string;
           
-          // Here would go the actual API call to WhatsApp
-          // For now we'll just simulate a successful response
+          options.body = {
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: phoneNumber,
+            type: 'text',
+            text: {
+              preview_url: false,
+              body: messageText,
+            },
+          };
+        } 
+        else if (operation === 'sendTemplate') {
+          // Implementación para plantillas
+          // Esta parte dependerá de cómo hayas configurado tus parámetros de plantilla
+          // en la declaración de propiedades
+        }
+        
+        // Realizar la llamada a la API
+        try {
+          console.log('Enviando solicitud a WhatsApp API:', JSON.stringify(options, null, 2));
           
-          const responseData = {
-            success: true,
-            phoneNumber,
-            message: messageText,
-            timestamp: new Date().toISOString(),
+          // Descomentar para hacer la llamada real a la API:
+          // const response = await this.helpers.httpRequest(options);
+          
+          // Para fines de desarrollo, simulamos una respuesta:
+          const response = {
+            messaging_product: 'whatsapp',
+            contacts: [
+              {
+                input: phoneNumber,
+                wa_id: phoneNumber,
+              },
+            ],
+            messages: [
+              {
+                id: 'wamid.' + Math.random().toString(36).substring(2, 15),
+              },
+            ],
           };
           
           returnData.push({
-            json: responseData,
+            json: {
+              success: true,
+              phoneNumber,
+              ...response,
+            },
             pairedItem: {
               item: i,
             },
           });
-        }
-      } catch (error) {
-        if (this.continueOnFail()) {
-          returnData.push({
-            json: {
-              error: error.message,
-            },
-            pairedItem: {
-              item: 0,
-            },
-          });
-        } else {
-          throw new NodeOperationError(this.getNode(), error);
+        } catch (error) {
+          console.error('Error al llamar a la API de WhatsApp:', error);
+          throw new NodeOperationError(this.getNode(), `Error al enviar mensaje: ${error.message}`);
         }
       }
+    } catch (error) {
+      if (this.continueOnFail()) {
+        returnData.push({
+          json: {
+            error: error.message,
+          },
+          pairedItem: {
+            item: 0,
+          },
+        });
+      } else {
+        throw new NodeOperationError(this.getNode(), error);
+      }
     }
-
-    return [returnData];
   }
+
+  return [returnData];
+}
 }
