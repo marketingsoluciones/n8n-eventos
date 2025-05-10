@@ -7,52 +7,58 @@ import {
 export class WhatsAppApi implements ICredentialType {
   name = 'whatsAppApi';
   displayName = 'WhatsApp API';
-  documentationUrl = '';
+documentationUrl = 'https://developers.facebook.com/docs/whatsapp/cloud-api';
 
   // Añadir configuración de autenticación para HTTP
-  authenticate: IAuthenticateGeneric = {
-    type: 'generic',
-    properties: {
-      headers: {
-        'X-API-KEY': '={{$credentials.apiKey}}',
-        'Authorization': 'Bearer {{$credentials.apiSecret}}',
-      },
+ authenticate: IAuthenticateGeneric = {
+  type: 'generic',
+  properties: {
+    headers: {
+      'Authorization': 'Bearer {{$credentials.accessToken}}',
     },
-  };  
-  properties: INodeProperties[] = [
-    {
-      displayName: 'API Key',
-      name: 'apiKey',
-      type: 'string',
-      default: '',
-       required: true,
-      description: 'La clave de API proporcionada por tu proveedor de WhatsApp',
+  },
+};
+properties: INodeProperties[] = [
+  {
+    displayName: 'API Version',
+    name: 'apiVersion',
+    type: 'string',
+    default: 'v16.0',
+    required: true,
+    description: 'The Meta API version to use (e.g., v16.0)',
+  },
+  {
+    displayName: 'Access Token',
+    name: 'accessToken',
+    type: 'string',
+    typeOptions: {
+      password: true,
     },
-    {
-      displayName: 'API Secret',
-      name: 'apiSecret',
-      type: 'string',
-      typeOptions: {
-        password: true,
-      },
-      default: '',
-        required: true,
-      description: 'El secreto de API para autenticación segura',   
-    },
-    {
-      displayName: 'Phone Number ID',
-      name: 'phoneNumberId',
-      type: 'string',
-      default: '',
-      description: 'ID del número de teléfono verificado en WhatsApp Business API',   
-    },
-     {
-      displayName: 'API URL',
-      name: 'apiUrl',
-      type: 'string',
-      default: 'https://api.whatsapp.com/v1',
-      required: true,
-      description: 'URL base del servicio de API de WhatsApp',
-    },
-  ];
-}
+    default: '',
+    required: true,
+    description: 'The access token for the WhatsApp Business API',
+  },
+  {
+    displayName: 'Phone Number ID',
+    name: 'phoneNumberId',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'The ID of your WhatsApp Business phone number',
+  },
+  {
+    displayName: 'Business Account ID',
+    name: 'businessAccountId',
+    type: 'string',
+    default: '',
+    description: 'The ID of your WhatsApp Business Account (WABA)',
+  },
+  {
+    displayName: 'API URL',
+    name: 'apiUrl',
+    type: 'string',
+    default: 'https://graph.facebook.com/{{$credentials.apiVersion}}',
+    required: true,
+    description: 'The base URL for the WhatsApp Business Cloud API',
+  },
+];}
