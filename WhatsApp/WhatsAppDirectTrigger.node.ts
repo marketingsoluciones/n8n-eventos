@@ -25,16 +25,11 @@ export class WhatsAppDirectTrigger implements INodeType {
     webhooks: [
       {
         name: 'default',
-        httpMethod: 'POST',
+        httpMethod: 'GET,POST',
         responseMode: 'onReceived',
         path: 'webhook',
       },
-         {
-        name: 'default',
-        httpMethod: 'GET',
-        responseMode: 'onReceived',
-        path: 'webhook',
-      },
+         
     ],
     properties: [
       {
@@ -67,6 +62,14 @@ export class WhatsAppDirectTrigger implements INodeType {
         },
         description: 'The token to use for authentication',
       },
+{
+  displayName: 'Meta Verify Token',
+  name: 'metaVerifyToken',
+  type: 'string',
+  default: '',
+  required: true,
+  description: 'The verification token for Meta/WhatsApp webhook validation',
+},      
     ],
   };
 
@@ -79,54 +82,42 @@ export class WhatsAppDirectTrigger implements INodeType {
     headers: req.headers,
   });
 
-// Manejar solicitudes GET (verificación de webhook de Facebook/Meta)
+// Manejar solicitudes GET (verificación de webhook de Meta/WhatsApp)
 if (req.method === 'GET') {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
   
-  console.log('Solicitud de verificación de webhook:', {
-    mode,
-    token,
-    challenge,
-  });
+  console.log('Solicitud de verificación de webhook:', { mode, token, challenge });
 
-  // Si es una solicitud de verificación
-  if (mode === 'subscribe' && challenge) {
-    console.log('Respondiendo con el challenge:', challenge);
+  // Obtener el token de verificación configurado
+  const configToken = this.getNodeParameter('metaVerifyToken') as string;
+  
+  // Verificar que sea una solicitud de suscripción válida
+  if (mode === 'subscribe' && token === configToken && challenge) {
+    console.log('Verificación exitosa, respondiendo con challenge:', challenge);
     
-    try {
-      // Acceder directamente al objeto de respuesta
-      const res = this.getResponseObject();
-      
-      // Configurar headers para texto plano
-      res.setHeader('Content-Type', 'text/plain');
-      
-      // Enviar el challenge como texto plano sin formato JSON
-      res.end(challenge as string);
-      
-      // Indicar a n8n que no procese más esta respuesta
-      return {
-        noWebhookResponse: true,
-      };
-    } catch (error) {
-      console.error('Error al enviar respuesta directa:', error);
-      
-      // Fallback si falla el método directo
-      return {
-        webhookResponse: {
-          statusCode: 200,
-          body: challenge,
+    return {
+      webhookResponse: {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'text/plain',
         },
-      };
-    }
+        body: challenge,
+      },
+    };
   }
   
-  // Si no es una solicitud de verificación pero es GET
+  console.log('Verificación fallida:', { 
+    modo: mode, 
+    tokenRecibido: token, 
+    tokenConfigurado: configToken 
+  });
+  
   return {
     webhookResponse: {
-      statusCode: 400,
-      body: 'Bad Request - Invalid GET request',
+      statusCode: 403,
+      body: 'Verification failed',
     },
   };
 }    
