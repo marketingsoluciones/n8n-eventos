@@ -68,7 +68,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       bodyType: typeof req.body,
       bodyKeys: req.body ? Object.keys(req.body) : 'No body'
     });
-  }
+  
  // Verificación de suscripción (GET)
 if (method === 'GET' && query['hub.mode'] === 'subscribe') {
   console.log('DEBUG - SOLICITUD COMPLETA DE GET:', {
@@ -179,7 +179,7 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
         body: 'Solicitud no válida'
       }
     };
-  } catch (error) {
+ catch (error) {
     console.error('ERROR GLOBAL EN WEBHOOK:', {
       message: error.message,
       stack: error.stack,
