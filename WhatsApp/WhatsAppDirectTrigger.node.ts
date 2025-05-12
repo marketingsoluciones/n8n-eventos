@@ -24,7 +24,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       {
         name: 'default',
         httpMethod: 'GET,POST',
-        responseMode: 'lastnode',
+        responseMode: 'lastNode',
         path: 'webhook',
       },
     ],
