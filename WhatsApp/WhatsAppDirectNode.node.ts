@@ -4,6 +4,7 @@ import {
   INodeType,
   INodeTypeDescription,
   NodeOperationError,
+   IExecuteFunctions, 
  // NodeExecuteFunctions, 
   IDataObject,
   IHttpRequestOptions,
@@ -498,7 +499,7 @@ export class WhatsAppDirectNode implements INodeType {
     ],
   };
 
-  async execute(this:  NodeExecuteFunctions): Promise<INodeExecutionData[][]> {
+  async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
     const resource = this.getNodeParameter('resource', 0) as string;
