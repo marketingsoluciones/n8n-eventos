@@ -187,9 +187,8 @@ export class WhatsAppDirectTrigger implements INodeType {
       // Check for Evolution API format
       if (body.event === 'messages.upsert' || body.event === 'message') {
         // Evolution API webhook format
-        
-        const processedData = this.processEvolutionApiWebhook(body, onlyMessages, selectedMessageTypes, includeMedia);
-        
+ const self = this as unknown as WhatsAppDirectTrigger;
+const processedData = self.processEvolutionApiWebhook(body, onlyMessages, selectedMessageTypes, includeMedia);
         if (processedData) {
           return {
             webhookResponse: {
@@ -304,8 +303,9 @@ export class WhatsAppDirectTrigger implements INodeType {
     
     // Add the chat name if it's a group
     if (processedData.isGroupMessage) {
-     processedData.chatName = typeof message.chat === 'object' && message.chat ? message.chat.name : '';
-     
+    if (message.media && typeof message.media === 'object' && (message.media as any).url) {
+  processedData.mediaUrl = (message.media as any).url;
+} 
     }
     
     // Extract media information if present and requested
