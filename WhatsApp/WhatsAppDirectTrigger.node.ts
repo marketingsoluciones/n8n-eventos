@@ -199,29 +199,32 @@ const isValid = true; // Temporalmente asumimos que es válida
         body: 'Solicitud no válida'
       }
     };
-  } catch (error) {
-     const req = this.getRequestObject();
-     console.error('ERROR GLOBAL EN WEBHOOK:', {
-       message: error.message,
-       stack: error.stack,
-       method: req?.method,
-       path: req?.path
-     });
-       
-     return {
-       webhookResponse: {
-         statusCode: 500,
-         body: 'Error interno del servidor'
-       },
-       workflowData: [
-         {
-           json: {
-             error: 'Error de procesamiento',
-             errorId: Date.now().toString(36)
-           }
-         }
-       ]
-     };
-   }
-  }
+} catch (error) {
+  const req = this.getRequestObject();
+  console.error('ERROR GLOBAL EN WEBHOOK:', {
+    message: error.message,
+    stack: error.stack,
+    method: req?.method,
+    path: req?.path
+  });
+  
+  // Definir primero los datos de error con el tipo correcto
+  const errorData: INodeExecutionData[] = [
+    {
+      json: {
+        error: 'Error de procesamiento',
+        errorId: Date.now().toString(36)
+      }
+    }
+  ];
+  
+  // Usar la variable en el return
+  return {
+    webhookResponse: {
+      statusCode: 500,
+      body: 'Error interno del servidor'
+    },
+    workflowData: errorData
+  };
+}  }
 }
