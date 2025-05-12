@@ -6,7 +6,6 @@ import {
    ITriggerResponse,
   IWebhookResponseData,
   IWebhookFunctions,  // Añade esta importación
-  IWebhookResponseData,
   NodeOperationError,
   IExecuteFunctions, // Cambiar NodeExecuteFunctions por IExecuteFunctions
   IDataObject,
