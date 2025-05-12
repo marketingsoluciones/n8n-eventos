@@ -199,30 +199,29 @@ const isValid = true; // Temporalmente asumimos que es válida
         body: 'Solicitud no válida'
       }
     };
-   } catch (error) {
-    const req = this.getRequestObject();
-    console.error('ERROR GLOBAL EN WEBHOOK:', {
-      message: error.message,
-      stack: error.stack,
-      method: req?.method,
-      path: req?.path
-    });
+  } catch (error) {
+     const req = this.getRequestObject();
+     console.error('ERROR GLOBAL EN WEBHOOK:', {
+       message: error.message,
+       stack: error.stack,
+       method: req?.method,
+       path: req?.path
+     });
        
- // Así debe ser la estructura completa del return en el bloque catch:
-return {
-  webhookResponse: {
-    statusCode: 500,
-    body: 'Error interno del servidor'
-  },
-  workflowData: [
-    {
-      json: {
-        error: 'Error de procesamiento',
-        errorId: Date.now().toString(36)
-      }
-    }
-  ]
-};
+     return {
+       webhookResponse: {
+         statusCode: 500,
+         body: 'Error interno del servidor'
+       },
+       workflowData: [
+         {
+           json: {
+             error: 'Error de procesamiento',
+             errorId: Date.now().toString(36)
+           }
+         }
+       ]
+     };
+   }
   }
-}
 }
