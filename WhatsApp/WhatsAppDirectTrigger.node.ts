@@ -1,14 +1,41 @@
+import {
+  INodeType,
+  INodeTypeDescription,
+  IWebhookFunctions,
+  IWebhookResponseData,
+  INodeExecutionData
+} from 'n8n-workflow';
+
 export class WhatsAppDirectTrigger implements INodeType {
   description: INodeTypeDescription = {
-    // ... configuración existente ...
+    displayName: 'WhatsApp Direct Trigger',
+    name: 'whatsAppDirectTrigger',
+    icon: 'file:whatsapp.svg',
+    group: ['trigger'],
+    version: 1,
+    description: 'Starts the workflow when a WhatsApp message is received',
+    defaults: {
+      name: 'WhatsApp Direct Trigger',
+      color: '#25D366',
+    },
+    inputs: [],
+    outputs: ['main'],
+    webhooks: [
+      {
+        name: 'default',
+        httpMethod: 'GET,POST',
+        responseMode: 'onReceived',
+        path: 'webhook',
+      },
+    ],
     properties: [
       {
-        displayName: 'Meta Verify Token',
-        name: 'metaVerifyToken',
+        displayName: 'Verification Token',
+        name: 'verificationToken',
         type: 'string',
         default: '',
         required: true,
-        description: 'Token de verificación único generado por ti'
+        description: 'Token de verificación único para el webhook de WhatsApp'
       },
       {
         displayName: 'App Secret',
@@ -16,7 +43,9 @@ export class WhatsAppDirectTrigger implements INodeType {
         type: 'string',
         default: '',
         required: true,
-        typeOptions: { password: true },
+        typeOptions: { 
+          password: true 
+        },
         description: 'App Secret de tu aplicación de Meta'
       }
     ]
@@ -28,7 +57,7 @@ export class WhatsAppDirectTrigger implements INodeType {
     const query = req.query || {};
 
     // Obtener tokens desde los parámetros del nodo
-    const VERIFY_TOKEN = this.getNodeParameter('metaVerifyToken') as string;
+    const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
     const APP_SECRET = this.getNodeParameter('appSecret') as string;
 
     // Registro detallado
@@ -87,9 +116,6 @@ export class WhatsAppDirectTrigger implements INodeType {
         };
       }
 
-      // Implementar verificación de firma HMAC con APP_SECRET
-      // (código de verificación de firma aquí)
-
       // Procesar mensaje de WhatsApp
       const body = req.body;
       if (body?.object === 'whatsapp_business_account') {
@@ -97,20 +123,22 @@ export class WhatsAppDirectTrigger implements INodeType {
           const messages = body.entry[0]?.changes[0]?.value?.messages;
           
           if (messages) {
-            messages.forEach(message => {
-              console.log(`Mensaje de WhatsApp recibido:`, {
+            const processedMessages: INodeExecutionData[] = messages.map(message => ({
+              json: {
                 type: message.type,
                 from: message.from,
                 body: message.type === 'text' ? message.text.body : 'Contenido no texto'
-              });
-            });
+              }
+            }));
+
+            console.log('Mensajes de WhatsApp procesados:', processedMessages);
 
             return {
               webhookResponse: {
                 statusCode: 200,
                 body: 'Mensaje procesado'
               },
-              workflowData: [this.helpers.returnJsonArray(body)]
+              workflowData: processedMessages
             };
           }
         } catch (error) {
