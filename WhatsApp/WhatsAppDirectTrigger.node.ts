@@ -82,9 +82,12 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
     }
   });
       
-  const receivedToken = query['hub.verify_token'];
-  const challenge = query['hub.challenge'];
+ const receivedToken = query['hub.verify_token'];
+const challenge = query['hub.challenge'];
+// AÑADIR:
+const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
 
+  
   if (receivedToken === VERIFY_TOKEN) {
     console.log('Verificación de Token Meta - ÉXITO', {
       challengeReceived: challenge,
@@ -183,8 +186,8 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
     console.error('ERROR GLOBAL EN WEBHOOK:', {
       message: error.message,
       stack: error.stack,
-      method: req.method,
-      path: req.path
+      method: req?.method,
+      path: req?.path
     });
 
     return {
