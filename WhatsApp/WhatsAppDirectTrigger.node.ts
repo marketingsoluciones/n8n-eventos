@@ -195,4 +195,4 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
     };
   }
 }
-
+}
