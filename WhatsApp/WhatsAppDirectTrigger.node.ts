@@ -50,7 +50,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       }
     ]
   };
-
+  
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
      try {
     const req = this.getRequestObject();
@@ -194,4 +194,5 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
       }
     };
   }
+}
 }
