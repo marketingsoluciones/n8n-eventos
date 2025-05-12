@@ -11,7 +11,7 @@ export class WhatsAppDirectTrigger implements INodeType {
     displayName: 'WhatsApp Direct Trigger',
     name: 'whatsAppDirectTrigger',
     icon: 'file:whatsapp.svg',
-    group: ['trigger'],
+    group: ['trigger'], 
     version: 1,
     description: 'Starts the workflow when a WhatsApp message is received',
     defaults: {
@@ -73,45 +73,51 @@ export class WhatsAppDirectTrigger implements INodeType {
       appSecret: APP_SECRET ? '[REDACTADO]' : 'No proporcionado'
     });
 
-    // Verificación de suscripción (GET)
-    if (method === 'GET' && query['hub.mode'] === 'subscribe') {
-
- console.log('Solicitud de Verificación Meta:', {
+ // Verificación de suscripción (GET)
+if (method === 'GET' && query['hub.mode'] === 'subscribe') {
+  console.log('Solicitud de Verificación Meta - Análisis Detallado:', {
     mode: query['hub.mode'],
     challenge: query['hub.challenge'],
-    verifyToken: query['hub.verify_token']
+    verifyToken: query['hub.verify_token'],
+    tokenLength: {
+      received: query['hub.verify_token']?.length,
+      expected: VERIFY_TOKEN.length
+    },
+    tokenMatchStatus: query['hub.verify_token'] === VERIFY_TOKEN
   });
       
-      const receivedToken = query['hub.verify_token'];
-      const challenge = query['hub.challenge'];
+  const receivedToken = query['hub.verify_token'];
+  const challenge = query['hub.challenge'];
 
-      console.log('Verificación de Suscripción Meta:', {
-        receivedToken,
-        expectedToken: VERIFY_TOKEN,
-        challenge
-      });
+  if (receivedToken === VERIFY_TOKEN) {
+    console.log('Verificación de Token Meta - ÉXITO', {
+      challengeReceived: challenge,
+      challengeLength: challenge.length
+    });
 
-      if (receivedToken === VERIFY_TOKEN) {
-        return {
-          webhookResponse: {
-            statusCode: 200,
-            body: challenge 
-          }
-        };
-      } else {
-        console.error('Error de Verificación de Token Meta:', {
-          receivedToken,
-          expectedToken: VERIFY_TOKEN
-        });
-
-        return {
-          webhookResponse: {
-            statusCode: 403,
-            body: 'Token de Verificación Inválido'
-          }
-        };
+    return {
+      webhookResponse: {
+        statusCode: 200,
+        body: challenge 
       }
-    }
+    };
+  } else {
+    console.error('Error de Verificación de Token Meta:', {
+      receivedToken,
+      expectedToken: VERIFY_TOKEN,
+      mismatchDetails: receivedToken 
+        ? `Tokens no coinciden. Recibido: ${receivedToken}` 
+        : 'Token recibido es nulo/undefined'
+    });
+
+    return {
+      webhookResponse: {
+        statusCode: 403,
+        body: 'Token de Verificación Inválido'
+      }
+    };
+  }
+}
 
     // Manejo de mensajes POST
     if (method === 'POST') {
