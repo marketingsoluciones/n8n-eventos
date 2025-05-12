@@ -91,13 +91,22 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
   if (receivedToken === VERIFY_TOKEN) {
     console.log('Verificación de Token Meta - ÉXITO', {
       challengeReceived: challenge,
-      challengeLength: challenge.length
+      challengeLength: challenge.length,
+      challengeType: typeof challenge challengeType: typeof challenge
     });
 
+      const challengeString = String(challenge);
+  
+  console.log('Respuesta exacta que se enviará:', challengeString);
+
+    
     return {
       webhookResponse: {
         statusCode: 200,
-        body: challenge 
+       body: challengeString,
+      headers: {
+        'Content-Type': 'text/plain'
+      }
       }
     };
   } else {
