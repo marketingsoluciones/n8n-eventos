@@ -133,8 +133,9 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
 // Mejora propuesta - hacer la verificación de firma opcional
 const appSecret = this.getNodeParameter('appSecret') as string;
 const signature = req.headers['x-hub-signature-256'];
-
-  // Insertar aquí
+// Línea donde falta definir la variable
+const body = req.body;  // Insertar aquí
+      
   console.log('Payload POST recibido:', {
     objectType: body?.object,
     hasEntries: !!body?.entry,
@@ -145,7 +146,7 @@ const signature = req.headers['x-hub-signature-256'];
       if (appSecret && !signature) {
         console.error('Sin firma de Meta recibida');
          const isValid = verifySignature(appSecret, signature, JSON.stringify(body));
-         const isValid = verifySignature(appSecret, signature, JSON.stringify(body));
+      
          if (!isValid) {        
            return {
              webhookResponse: {
@@ -177,12 +178,12 @@ const signature = req.headers['x-hub-signature-256'];
                 statusCode: 200,
                 body: 'Mensaje procesado'
               },
-              workflowData: [{
-          json: {
-            ...message,
-            receivedAt: new Date().toISOString()
-          }
-        }]
+             workflowData: messages.map(msg => ({
+  json: {
+    ...msg,
+    receivedAt: new Date().toISOString()
+  }
+}))
             };
           }
         } catch (error) {
@@ -211,12 +212,14 @@ const signature = req.headers['x-hub-signature-256'];
         statusCode: 500,
         body: 'Error interno del servidor'
       },
-          workflowData: [{
-      json: {
-        error: 'Error de procesamiento',
-        errorId: Date.now().toString(36)
-      }
-    }]
+          workflowData: [
+            {
+          json: {
+              error: 'Error de procesamiento',
+              errorId: Date.now().toString(36)
+                }
+            }
+                      ]
     };
   }
 }
