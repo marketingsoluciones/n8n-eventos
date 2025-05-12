@@ -204,8 +204,9 @@ const processedData = self.processEvolutionApiWebhook(body, onlyMessages, select
       
       // Handle Meta/WhatsApp Business API format
       else if (body.object === 'whatsapp_business_account') {
-        const processedData = this.processMetaWebhook(body, onlyMessages, selectedMessageTypes, includeMedia);
-        
+    const self = this as unknown as WhatsAppDirectTrigger;
+const processedData = self.processMetaWebhook(body, onlyMessages, selectedMessageTypes, includeMedia);
+       
         if (processedData) {
           return {
             webhookResponse: {
@@ -312,9 +313,9 @@ const processedData = self.processEvolutionApiWebhook(body, onlyMessages, select
     if (includeMedia && message.media) {
       processedData.media = message.media;
       
-      if (message.media.url) {
-        processedData.mediaUrl = message.media.url;
-      }
+    if (message.media && typeof message.media === 'object' && (message.media as any).url) {
+  processedData.mediaUrl = (message.media as any).url;
+}
     }
     
     // Extract button info if it's a button message
