@@ -42,7 +42,7 @@ export class WhatsAppDirectTrigger implements INodeType {
         name: 'appSecret',
         type: 'string',
         default: '',
-        required: true,
+        required: false,
         typeOptions: { 
           password: true 
         },
@@ -130,11 +130,9 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
     // Manejo de mensajes POST
     if (method === 'POST') {
       
-      
-      // Verificación de firma HMAC para mayor seguridad
-      const signature = req.headers['x-hub-signature-256'];
-     
-      const body = req.body;
+// Mejora propuesta - hacer la verificación de firma opcional
+const appSecret = this.getNodeParameter('appSecret') as string;
+const signature = req.headers['x-hub-signature-256'];
 
   // Insertar aquí
   console.log('Payload POST recibido:', {
@@ -144,16 +142,19 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
   });
 
       
-      if (!signature) {
+      if (appSecret && !signature) {
         console.error('Sin firma de Meta recibida');
-        return {
-          webhookResponse: {
+         const isValid = verifySignature(appSecret, signature, JSON.stringify(body));
+         const isValid = verifySignature(appSecret, signature, JSON.stringify(body));
+         if (!isValid) {        
+           return {
+             webhookResponse: {
             statusCode: 401,
             body: 'No se proporcionó firma'
           }
         };
       }
-
+}    
       // Procesar mensaje de WhatsApp
     
       if (body?.object === 'whatsapp_business_account') {
@@ -176,7 +177,12 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
                 statusCode: 200,
                 body: 'Mensaje procesado'
               },
-             workflowData: processedMessages.map(msg => [msg])
+              workflowData: [{
+          json: {
+            ...message,
+            receivedAt: new Date().toISOString()
+          }
+        }]
             };
           }
         } catch (error) {
@@ -204,7 +210,13 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
       webhookResponse: {
         statusCode: 500,
         body: 'Error interno del servidor'
+      },
+          workflowData: [{
+      json: {
+        error: 'Error de procesamiento',
+        errorId: Date.now().toString(36)
       }
+    }]
     };
   }
 }
