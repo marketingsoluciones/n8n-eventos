@@ -44,29 +44,40 @@ export class WhatsAppDirectNode implements INodeType {
         ],
         default: 'message',
       },
-      {
-        displayName: 'Operation',
-        name: 'operation',
-        type: 'options',
-        noDataExpression: true,
-        displayOptions: {
-          show: {
-            resource: ['message'],
-          },
-        },
-       options: [
-  {
-    name: 'Send Text',
-    value: 'sendText',
-    description: 'Send a text message',
-  },
-  {
-    name: 'Send Template',
-    value: 'sendTemplate',
-    description: 'Send a template message',
-  },
-],        default: 'send',
+    {
+    displayName: 'Operation',
+    name: 'operation',
+    type: 'options',
+    noDataExpression: true,
+    displayOptions: {
+      show: {
+        resource: ['message'],
       },
+    },
+    options: [
+      {
+        name: 'Send Text',
+        value: 'sendText',
+        description: 'Send a text message',
+      },
+      {
+        name: 'Send Image',
+        value: 'sendImage',
+        description: 'Send an image',
+      },
+      {
+        name: 'Send Document',
+        value: 'sendDocument',
+        description: 'Send a document',
+      },
+      {
+        name: 'Get Contact Info',
+        value: 'getContactInfo',
+        description: 'Get information about a contact',
+      },
+    ],
+    default: 'sendText',
+  },
       {
         displayName: 'Phone Number',
         name: 'phoneNumber',
@@ -102,86 +113,44 @@ async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
   const returnData: INodeExecutionData[] = [];
   const resource = this.getNodeParameter('resource', 0) as string;
   const operation = this.getNodeParameter('operation', 0) as string;
-  
+
   // Obtener credenciales
   const credentials = await this.getCredentials('whatsAppApi');
   const apiUrl = credentials.apiUrl as string;
-  const phoneNumberId = credentials.phoneNumberId as string;
-
+  const apiKey = credentials.apiKey as string;
+  
   // Implementación para enviar mensajes de WhatsApp
-  if (resource === 'message') {
+  if (resource === 'message' && operation === 'send') {
     try {
       for (let i = 0; i < items.length; i++) {
         const phoneNumber = this.getNodeParameter('phoneNumber', i) as string;
+        const messageText = this.getNodeParameter('messageText', i) as string;
         
-        // Preparar opciones de solicitud HTTP
-        const options: IHttpRequestOptions = {
-          url: `${apiUrl}/${phoneNumberId}/messages`,
-          method: 'POST',
+        // Preparar la solicitud a la API de Evolution
+        const options = {
           headers: {
             'Content-Type': 'application/json',
+            'apikey': apiKey,
           },
-          body: {},
+          method: 'POST',
+          body: JSON.stringify({
+            phone: phoneNumber,
+            message: messageText,
+            // Puedes añadir más parámetros según la documentación de la API
+          }),
+          uri: `${apiUrl}/message/text`,
+          json: true,
         };
-
-        // Construir el cuerpo de la solicitud según la operación
-        if (operation === 'sendText') {
-          const messageText = this.getNodeParameter('messageText', i) as string;
-          
-          options.body = {
-            messaging_product: 'whatsapp',
-            recipient_type: 'individual',
-            to: phoneNumber,
-            type: 'text',
-            text: {
-              preview_url: false,
-              body: messageText,
-            },
-          };
-        } 
-        else if (operation === 'sendTemplate') {
-          // Implementación para plantillas
-          // Esta parte dependerá de cómo hayas configurado tus parámetros de plantilla
-          // en la declaración de propiedades
-        }
         
-        // Realizar la llamada a la API
-        try {
-          console.log('Enviando solicitud a WhatsApp API:', JSON.stringify(options, null, 2));
-          
-          // Descomentar para hacer la llamada real a la API:
-          // const response = await this.helpers.httpRequest(options);
-          
-          // Para fines de desarrollo, simulamos una respuesta:
-          const response = {
-            messaging_product: 'whatsapp',
-            contacts: [
-              {
-                input: phoneNumber,
-                wa_id: phoneNumber,
-              },
-            ],
-            messages: [
-              {
-                id: 'wamid.' + Math.random().toString(36).substring(2, 15),
-              },
-            ],
-          };
-          
-          returnData.push({
-            json: {
-              success: true,
-              phoneNumber,
-              ...response,
-            },
-            pairedItem: {
-              item: i,
-            },
-          });
-        } catch (error) {
-          console.error('Error al llamar a la API de WhatsApp:', error);
-          throw new NodeOperationError(this.getNode(), `Error al enviar mensaje: ${error.message}`);
-        }
+        // Realizar la solicitud HTTP
+        const response = await this.helpers.request(options);
+        
+        returnData.push({
+          json: response,
+          pairedItem: {
+            item: i,
+          },
+        });
       }
     } catch (error) {
       if (this.continueOnFail()) {
@@ -200,5 +169,4 @@ async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
   }
 
   return [returnData];
-}
 }
