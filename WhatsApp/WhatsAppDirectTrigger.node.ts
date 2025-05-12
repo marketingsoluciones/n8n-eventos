@@ -3,6 +3,7 @@ import {
   INodeType,
   INodeTypeDescription,
   IWebhookResponseData,
+   INodeExecutionData,
   IDataObject,
   NodeOperationError,
 } from 'n8n-workflow';
