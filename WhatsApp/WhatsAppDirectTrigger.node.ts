@@ -1,77 +1,14 @@
-import {
-  IExecuteFunctions,
-  IWebhookFunctions,
-  INodeExecutionData,
-  INodeType,
-  INodeTypeDescription,
-  ITriggerResponse,
-  IWebhookResponseData,
-} from 'n8n-workflow';
-
 export class WhatsAppDirectTrigger implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'WhatsApp Direct Trigger',
-    name: 'whatsAppDirectTrigger',
-    icon: 'file:whatsapp.svg',
-    group: ['trigger'],
-    version: 1,
-    description: 'Starts the workflow when a WhatsApp message is received',
-    defaults: {
-      name: 'WhatsApp Direct Trigger',
-      color: '#25D366',
-    },
-    inputs: [],
-    outputs: ['main'],
-    webhooks: [
-      {
-        name: 'default',
-        httpMethod: 'GET,POST',
-        responseMode: 'onReceived',
-        path: 'webhook',
-      },
-    ],
+    // ... configuración existente ...
     properties: [
-      {
-        displayName: 'Authentication',
-        name: 'authentication',
-        type: 'options',
-        options: [
-          {
-            name: 'None',
-            value: 'none',
-          },
-          {
-            name: 'Token',
-            value: 'token',
-          },
-          {
-            name: 'Meta',
-            value: 'meta',
-          },
-        ],
-        default: 'none',
-        description: 'The method to authenticate webhook requests',
-      },
-      {
-        displayName: 'Token',
-        name: 'token',
-        type: 'string',
-        default: '',
-        required: true,
-        displayOptions: {
-          show: {
-            authentication: ['token'],
-          },
-        },
-        description: 'The token to use for authentication',
-      },
       {
         displayName: 'Meta Verify Token',
         name: 'metaVerifyToken',
         type: 'string',
         default: '',
         required: true,
-        description: 'The verification token for Meta/WhatsApp webhook validation',
+        description: 'Token de verificación único generado por ti'
       },
       {
         displayName: 'App Secret',
@@ -79,193 +16,114 @@ export class WhatsAppDirectTrigger implements INodeType {
         type: 'string',
         default: '',
         required: true,
-        typeOptions: {
-          password: true,
-        },
-        displayOptions: {
-          show: {
-            authentication: ['meta'],
-          },
-        },
-        description: 'The App Secret from your Facebook App Dashboard used to validate webhook signatures',
-      },
-    ],
+        typeOptions: { password: true },
+        description: 'App Secret de tu aplicación de Meta'
+      }
+    ]
   };
 
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     const req = this.getRequestObject();
     const method = req.method;
-    const authentication = this.getNodeParameter('authentication') as string;
     const query = req.query || {};
-    
-    // Verificación de token de WhatsApp
-    const VERIFY_TOKEN = 'xK9#mB2$pL7zQ3*wF5jH1nR4vT6yS8'; 
 
-    console.log('Webhook recibido:', {
-      method: req.method,
-      path: req.path,
-      query: req.query,
-      headers: req.headers,
-    });
-console.log('Meta Webhook Request:', {
-  method: req.method,
-  query: JSON.stringify(query),
-  headers: req.headers
-});
-   
-  // Verificación de Meta (GET request)
-  if (method === 'GET' && query['hub.mode'] === 'subscribe') {
-    const receivedToken = query['hub.verify_token'];
-    const challenge = query['hub.challenge'];
+    // Obtener tokens desde los parámetros del nodo
+    const VERIFY_TOKEN = this.getNodeParameter('metaVerifyToken') as string;
+    const APP_SECRET = this.getNodeParameter('appSecret') as string;
 
-    console.log('Verificación de Meta:', {
-      receivedToken,
-      expectedToken: VERIFY_TOKEN,
-      challenge
+    // Registro detallado
+    console.log('Webhook Meta - Detalles:', {
+      method,
+      query: JSON.stringify(query),
+      verifyToken: VERIFY_TOKEN,
+      appSecret: APP_SECRET ? '[REDACTADO]' : 'No proporcionado'
     });
 
-    if (receivedToken === VERIFY_TOKEN) {
-      return {
-        webhookResponse: {
-          statusCode: 200,
-          body: challenge // Devolver exactamente el challenge recibido
-        }
-      };
-    } else {
-      console.error('Error de verificación de Meta:', {
+    // Verificación de suscripción (GET)
+    if (method === 'GET' && query['hub.mode'] === 'subscribe') {
+      const receivedToken = query['hub.verify_token'];
+      const challenge = query['hub.challenge'];
+
+      console.log('Verificación de Suscripción Meta:', {
         receivedToken,
-        expectedToken: VERIFY_TOKEN
+        expectedToken: VERIFY_TOKEN,
+        challenge
       });
 
-      return {
-        webhookResponse: {
-          statusCode: 403,
-          body: 'Verification Failed'
-        }
-      };
-    }
-  }
-
-  // Resto del código para manejar mensajes...
-}
-
-      // Manejo de otros mensajes GET
-      const body = req.body;
-      if (body) {
+      if (receivedToken === VERIFY_TOKEN) {
         return {
           webhookResponse: {
             statusCode: 200,
-            body: { success: true }
-          },
-          workflowData: [this.helpers.returnJsonArray(body)]
+            body: challenge 
+          }
+        };
+      } else {
+        console.error('Error de Verificación de Token Meta:', {
+          receivedToken,
+          expectedToken: VERIFY_TOKEN
+        });
+
+        return {
+          webhookResponse: {
+            statusCode: 403,
+            body: 'Token de Verificación Inválido'
+          }
+        };
+      }
+    }
+
+    // Manejo de mensajes POST
+    if (method === 'POST') {
+      // Verificación de firma HMAC para mayor seguridad
+      const signature = req.headers['x-hub-signature-256'];
+      
+      if (!signature) {
+        console.error('Sin firma de Meta recibida');
+        return {
+          webhookResponse: {
+            statusCode: 401,
+            body: 'No se proporcionó firma'
+          }
         };
       }
 
-      return {
-        webhookResponse: {
-          statusCode: 400,
-          body: { error: 'Invalid request' }
-        }
-      };
-    }
+      // Implementar verificación de firma HMAC con APP_SECRET
+      // (código de verificación de firma aquí)
 
-    // Manejo de solicitudes POST
-    if (method === 'POST') {
-      // Para solicitudes de WhatsApp, aceptamos sin verificar token
-      if (req.body && req.body.object === 'whatsapp_business_account') {
-        console.log('[WhatsApp] Mensaje de WhatsApp Business recibido, procesando sin verificación de token');
-      } 
-      // Para otras solicitudes, verificamos según el método de autenticación configurado
-      else if (authentication === 'token') {
-        const headerToken = req.headers['x-webhook-token'];
-        const configToken = this.getNodeParameter('token') as string;
-
-        if (headerToken !== configToken) {
-          console.log(`Autenticación por token fallida: { tokenRecibido: ${headerToken}, tokenConfigurado: '${configToken}' }`);
-          return {
-            webhookResponse: {
-              statusCode: 401,
-              body: {
-                error: 'Unauthorized',
-              },
-            },
-          };
-        }
-      } else if (authentication === 'meta') {
-        // Verificación de firma para Meta/Facebook
-        const signature = req.headers['x-hub-signature-256'] || req.headers['x-hub-signature'];
-        const appSecret = this.getNodeParameter('appSecret') as string;
-        
-        if (!signature) {
-          console.log('Solicitud sin firma de Meta');
-          return {
-            webhookResponse: {
-              statusCode: 401,
-              body: {
-                error: 'No signature provided',
-              },
-            },
-          };
-        }
-        
-        // En una implementación real, aquí verificarías la firma HMAC
-        // utilizando el appSecret y el cuerpo de la solicitud
-        console.log('Firma de Meta recibida:', signature);
-      }
-
-      // Procesar el cuerpo de la solicitud
+      // Procesar mensaje de WhatsApp
       const body = req.body;
-      if (typeof body === 'object' && body !== null) {
-        // Extraer información relevante del mensaje para logs
+      if (body?.object === 'whatsapp_business_account') {
         try {
-          if (body.object === 'whatsapp_business_account' && 
-              body.entry && 
-              body.entry[0].changes && 
-              body.entry[0].changes[0].value.messages) {
-            
-            const message = body.entry[0].changes[0].value.messages[0];
-            if (message.type === 'text') {
-              console.log(`[WhatsApp] Mensaje de texto recibido: ${message.text.body}`);
-            } else {
-              console.log(`[WhatsApp] Mensaje de tipo ${message.type} recibido`);
-            }
+          const messages = body.entry[0]?.changes[0]?.value?.messages;
+          
+          if (messages) {
+            messages.forEach(message => {
+              console.log(`Mensaje de WhatsApp recibido:`, {
+                type: message.type,
+                from: message.from,
+                body: message.type === 'text' ? message.text.body : 'Contenido no texto'
+              });
+            });
+
+            return {
+              webhookResponse: {
+                statusCode: 200,
+                body: 'Mensaje procesado'
+              },
+              workflowData: [this.helpers.returnJsonArray(body)]
+            };
           }
         } catch (error) {
-          console.log(`[WhatsApp] Error al extraer información del mensaje: ${error.message}`);
+          console.error('Error procesando mensaje:', error);
         }
-        
-        // Siempre devolvemos 200 para mensajes de WhatsApp
-        console.log('Datos de webhook procesados correctamente');
-        return {
-          webhookResponse: {
-            statusCode: 200,
-            body: {
-              success: true,
-            },
-          },
-          workflowData: [this.helpers.returnJsonArray(body)],
-        };
       }
-
-      console.log('Formato de cuerpo inválido:', body);
-      return {
-        webhookResponse: {
-          statusCode: 400,
-          body: {
-            error: 'Invalid body format',
-          },
-        },
-      };
     }
 
-    // Si el método no es GET ni POST
     return {
       webhookResponse: {
-        statusCode: 405,
-        body: {
-          error: 'Method Not Allowed',
-        },
-      },
+        statusCode: 400,
+        body: 'Solicitud no válida'
+      }
     };
   }
 }
