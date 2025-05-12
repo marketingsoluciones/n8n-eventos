@@ -162,7 +162,7 @@ export class WhatsAppDirectTrigger implements INodeType {
                 statusCode: 200,
                 body: 'Mensaje procesado'
               },
-             workflowData: [processedMessages]  
+             workflowData: processedMessages  
             };
           }
         } catch (error) {
