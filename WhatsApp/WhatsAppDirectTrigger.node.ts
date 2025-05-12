@@ -50,7 +50,13 @@ export class WhatsAppDirectTrigger implements INodeType {
       }
     ]
   };
-  
+   private objectToString(obj: any): string {
+    try {
+      return JSON.stringify(obj, null, 2);
+    } catch (error) {
+      return `[Error al serializar objeto: ${error.message}]`;
+    }
+  }  
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
      try {
     const req = this.getRequestObject();
@@ -87,31 +93,31 @@ const challenge = query['hub.challenge'];
 // AÑADIR:
 const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
 
-  
-  if (receivedToken === VERIFY_TOKEN) {
-    console.log('Verificación de Token Meta - ÉXITO', {
-      challengeReceived: challenge,
-      challengeLength: challenge.length,
-      challengeType: typeof challenge 
-    });
+ // Modifica esta parte en tu WhatsAppDirectTrigger.node.ts
+// REEMPLAZAR CON ESTE CÓDIGO
+if (receivedToken === VERIFY_TOKEN) {
+  console.log('Verificación de Token Meta - ÉXITO', {
+    challengeReceived: challenge,
+    challengeLength: challenge.length,
+    challengeType: typeof challenge 
+  });
 
-      const challengeString = String(challenge);
-  
-  // Por estas:
-console.log('Respuesta exacta que se enviará:', challenge);
-
-return {
-  webhookResponse: {
-    statusCode: 200,
-    body: challenge,
-    headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'no-cache'
+  // Crear objeto de respuesta
+  const responseObj = {
+    webhookResponse: {
+      statusCode: 200,
+      body: String(challenge), // Asegurarse de que sea string puro
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8' // Charset explícito
+      }
     }
-  }
-};
-
-  } else {
+  };
+  
+  // Loguear el objeto completo para depuración
+  console.log('RESPUESTA COMPLETA QUE SE ENVIARÁ:', this.objectToString(responseObj));
+  
+  return responseObj;
+} else {
     console.error('Error de Verificación de Token Meta:', {
       receivedToken,
       expectedToken: VERIFY_TOKEN,
