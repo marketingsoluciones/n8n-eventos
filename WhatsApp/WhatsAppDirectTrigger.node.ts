@@ -182,14 +182,15 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
         body: 'Solicitud no válida'
       }
     };
-     } catch (error) {
+   } catch (error) {
+    const req = this.getRequestObject();
     console.error('ERROR GLOBAL EN WEBHOOK:', {
       message: error.message,
       stack: error.stack,
       method: req?.method,
       path: req?.path
     });
-
+       
     return {
       webhookResponse: {
         statusCode: 500,
