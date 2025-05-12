@@ -75,15 +75,15 @@ export class WhatsAppDirectTrigger implements INodeType {
 
  // Verificación de suscripción (GET)
 if (method === 'GET' && query['hub.mode'] === 'subscribe') {
-  console.log('Solicitud de Verificación Meta - Análisis Detallado:', {
-    mode: query['hub.mode'],
-    challenge: query['hub.challenge'],
-    verifyToken: query['hub.verify_token'],
-    tokenLength: {
-      received: query['hub.verify_token']?.length,
-      expected: VERIFY_TOKEN.length
-    },
-    tokenMatchStatus: query['hub.verify_token'] === VERIFY_TOKEN
+  console.log('DEBUG - SOLICITUD COMPLETA DE GET:', {
+    fullQuery: query,
+    headers: req.headers,
+    methodDetails: {
+      method,
+      mode: query['hub.mode'],
+      challenge: query['hub.challenge'],
+      verifyToken: query['hub.verify_token']
+    }
   });
       
   const receivedToken = query['hub.verify_token'];
