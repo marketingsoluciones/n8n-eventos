@@ -208,20 +208,21 @@ const isValid = true; // Temporalmente asumimos que es válida
       path: req?.path
     });
        
-    return {
-      webhookResponse: {
-        statusCode: 500,
-        body: 'Error interno del servidor'
-      },
-         workflowData: [
-  {
-    json: {
-      error: 'Error de procesamiento',
-      errorId: Date.now().toString(36)
+ // Así debe ser la estructura completa del return en el bloque catch:
+return {
+  webhookResponse: {
+    statusCode: 500,
+    body: 'Error interno del servidor'
+  },
+  workflowData: [
+    {
+      json: {
+        error: 'Error de procesamiento',
+        errorId: Date.now().toString(36)
+      }
     }
-  }
-]
-    };
+  ]
+};
   }
 }
 }
