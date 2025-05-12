@@ -99,7 +99,7 @@ export class WhatsAppDirectTrigger implements INodeType {
     const query = req.query || {};
     
     // Verificación de token de WhatsApp
-    const VERIFY_TOKEN = 'miTokenWhatsApp2025'; 
+    const VERIFY_TOKEN = 'xK9#mB2$pL7zQ3*wF5jH1nR4vT6yS8'; 
 
     console.log('Webhook recibido:', {
       method: req.method,
@@ -107,33 +107,47 @@ export class WhatsAppDirectTrigger implements INodeType {
       query: req.query,
       headers: req.headers,
     });
+console.log('Meta Webhook Request:', {
+  method: req.method,
+  query: JSON.stringify(query),
+  headers: req.headers
+});
+   
+  // Verificación de Meta (GET request)
+  if (method === 'GET' && query['hub.mode'] === 'subscribe') {
+    const receivedToken = query['hub.verify_token'];
+    const challenge = query['hub.challenge'];
 
-    // Verificación de Meta (GET request)
-    if (method === 'GET') {
-      console.log(`[WhatsApp] Solicitud de verificación de webhook: ${JSON.stringify(query)}`);
-      
-      // Verificar si es una solicitud de verificación de Meta
-      if (query['hub.mode'] === 'subscribe') {
-        const receivedToken = query['hub.verify_token'];
-        const challenge = query['hub.challenge'];
+    console.log('Verificación de Meta:', {
+      receivedToken,
+      expectedToken: VERIFY_TOKEN,
+      challenge
+    });
 
-        if (receivedToken === VERIFY_TOKEN) {
-          return {
-            webhookResponse: {
-              statusCode: 200,
-              body: challenge
-            }
-          };
-        } else {
-          console.error('Token de verificación inválido:', receivedToken);
-          return {
-            webhookResponse: {
-              statusCode: 403,
-              body: 'Verification token failed'
-            }
-          };
+    if (receivedToken === VERIFY_TOKEN) {
+      return {
+        webhookResponse: {
+          statusCode: 200,
+          body: challenge // Devolver exactamente el challenge recibido
         }
-      }
+      };
+    } else {
+      console.error('Error de verificación de Meta:', {
+        receivedToken,
+        expectedToken: VERIFY_TOKEN
+      });
+
+      return {
+        webhookResponse: {
+          statusCode: 403,
+          body: 'Verification Failed'
+        }
+      };
+    }
+  }
+
+  // Resto del código para manejar mensajes...
+}
 
       // Manejo de otros mensajes GET
       const body = req.body;
