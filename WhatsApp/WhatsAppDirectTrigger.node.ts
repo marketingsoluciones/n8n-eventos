@@ -119,7 +119,8 @@ export class WhatsAppDirectTrigger implements INodeType {
       
       // Verificación de firma HMAC para mayor seguridad
       const signature = req.headers['x-hub-signature-256'];
-  const body = req.body;
+     
+      const body = req.body;
 
   // Insertar aquí
   console.log('Payload POST recibido:', {
@@ -140,7 +141,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       }
 
       // Procesar mensaje de WhatsApp
-      const body = req.body;
+    
       if (body?.object === 'whatsapp_business_account') {
         try {
           const messages = body.entry[0]?.changes[0]?.value?.messages;
