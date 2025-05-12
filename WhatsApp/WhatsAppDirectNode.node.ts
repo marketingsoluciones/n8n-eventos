@@ -1,10 +1,10 @@
-import { NodeExecuteFunctions } from 'n8n-core';
+import { IExecuteFunctions } from 'n8n-core';
 import {
   INodeExecutionData,
   INodeType,
   INodeTypeDescription,
   NodeOperationError,
-  NodeExecuteFunctions, 
+ // NodeExecuteFunctions, 
   IDataObject,
   IHttpRequestOptions,
    IHttpRequestMethods,
