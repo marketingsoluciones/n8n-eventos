@@ -60,6 +60,11 @@ export class WhatsAppDirectTrigger implements INodeType {
     const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
     const APP_SECRET = this.getNodeParameter('appSecret') as string;
 
+    console.log('=================== WEBHOOK RECIBIDO ===================', {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    path: req.path
+  });
     // Registro detallado
     console.log('Webhook Meta - Detalles:', {
       method,
@@ -70,6 +75,13 @@ export class WhatsAppDirectTrigger implements INodeType {
 
     // Verificación de suscripción (GET)
     if (method === 'GET' && query['hub.mode'] === 'subscribe') {
+
+ console.log('Solicitud de Verificación Meta:', {
+    mode: query['hub.mode'],
+    challenge: query['hub.challenge'],
+    verifyToken: query['hub.verify_token']
+  });
+      
       const receivedToken = query['hub.verify_token'];
       const challenge = query['hub.challenge'];
 
@@ -103,8 +115,19 @@ export class WhatsAppDirectTrigger implements INodeType {
 
     // Manejo de mensajes POST
     if (method === 'POST') {
+      
+      
       // Verificación de firma HMAC para mayor seguridad
-      const signature = req.headers['x-hub-signature-256'];
+      const signature = req.headers['x-hub-signature-256
+
+
+  // Insertar aquí
+  console.log('Payload POST recibido:', {
+    objectType: body?.object,
+    hasEntries: !!body?.entry,
+    entriesCount: body?.entry?.length || 0
+  });
+
       
       if (!signature) {
         console.error('Sin firma de Meta recibida');
