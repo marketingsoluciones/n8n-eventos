@@ -97,18 +97,20 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
 
       const challengeString = String(challenge);
   
-  console.log('Respuesta exacta que se enviará:', challengeString);
+  // Por estas:
+console.log('Respuesta exacta que se enviará:', challenge);
 
-    
-    return {
-      webhookResponse: {
-        statusCode: 200,
-       body: challengeString,
-      headers: {
-        'Content-Type': 'text/plain'
-      }
-      }
-    };
+return {
+  webhookResponse: {
+    statusCode: 200,
+    body: challenge,
+    headers: {
+      'Content-Type': 'text/plain',
+      'Cache-Control': 'no-cache'
+    }
+  }
+};
+
   } else {
     console.error('Error de Verificación de Token Meta:', {
       receivedToken,
