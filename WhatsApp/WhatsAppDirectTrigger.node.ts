@@ -101,8 +101,7 @@ if (receivedToken === VERIFY_TOKEN) {
     challengeLength: challenge.length,
     challengeType: typeof challenge 
   });
-
-  // Crear objeto de respuesta
+ console.log('Respuesta exacta que se enviará:', challenge);  // Crear objeto de respuesta
   const responseObj = {
     webhookResponse: {
       statusCode: 200,
@@ -114,7 +113,8 @@ if (receivedToken === VERIFY_TOKEN) {
   };
   
   // Loguear el objeto completo para depuración
-  console.log('RESPUESTA COMPLETA QUE SE ENVIARÁ:', this.objectToString(responseObj));
+  console.log('RESPUESTA COMPLETA QUE SE ENVIARÁ:', JSON.stringify(responseObj, null, 2));
+ 
   
   return responseObj;
 } else {
