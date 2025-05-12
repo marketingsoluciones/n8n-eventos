@@ -301,7 +301,8 @@ export class WhatsAppDirectTrigger implements INodeType {
     
     // Add the chat name if it's a group
     if (processedData.isGroupMessage) {
-      processedData.chatName = message.chat?.name || body.chat?.name || '';
+     processedData.chatName = typeof message.chat === 'object' && message.chat ? message.chat.name : '';
+     
     }
     
     // Extract media information if present and requested
