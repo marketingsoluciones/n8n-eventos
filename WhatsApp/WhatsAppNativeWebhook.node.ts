@@ -75,10 +75,11 @@ export class WhatsAppNativeWebhook implements INodeType {
           return {
             webhookResponse: {
               statusCode: 200,
-              body: challenge,
-              headers: {
+                 headers: {
                 'Content-Type': 'text/plain',
               },
+              body: challenge,
+                  encoding: 'raw', 
             },
           };
         } else {
