@@ -1,4 +1,4 @@
-import { IExecuteFunctions } from 'n8n-core';
+import { NodeExecuteFunctions } from 'n8n-core';
 import {
   INodeExecutionData,
   INodeType,
@@ -6,6 +6,7 @@ import {
   NodeOperationError,
   IDataObject,
   IHttpRequestOptions,
+   IHttpRequestMethods,
 } from 'n8n-workflow';
 
 export class WhatsAppDirectNode implements INodeType {
@@ -543,7 +544,7 @@ export class WhatsAppDirectNode implements INodeType {
             'apikey': apiKey,
             'Authorization': `Bearer ${credentials.apiSecret}`,
           },
-          method,
+         method: method as IHttpRequestMethods,
           body,
           url: `${apiUrl}${endpoint}`,
           json: true,
