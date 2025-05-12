@@ -209,14 +209,17 @@ const isValid = true; // Temporalmente asumimos que es válida
   });
   
   // Definir primero los datos de error con el tipo correcto
-  const errorData: INodeExecutionData[] = [
+  // Definir primero los datos de error con el tipo correcto - array de arrays
+const errorData: INodeExecutionData[][] = [
+  [  // <-- Nota el array adicional aquí
     {
       json: {
         error: 'Error de procesamiento',
         errorId: Date.now().toString(36)
       }
     }
-  ];
+  ]  // <-- Cierre del array adicional
+];
   
   // Usar la variable en el return
   return {
