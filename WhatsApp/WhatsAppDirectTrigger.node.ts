@@ -92,7 +92,7 @@ const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
     console.log('Verificación de Token Meta - ÉXITO', {
       challengeReceived: challenge,
       challengeLength: challenge.length,
-      challengeType: typeof challenge challengeType: typeof challenge
+      challengeType: typeof challenge 
     });
 
       const challengeString = String(challenge);
