@@ -1,11 +1,13 @@
 import { IWebhookFunctions } from 'n8n-core';
 import {
+ INodeExecutionData,
   INodeType,
   INodeTypeDescription,
-  IWebhookResponseData,
-   INodeExecutionData,
-  IDataObject,
   NodeOperationError,
+  IExecuteFunctions, // Cambiar NodeExecuteFunctions por IExecuteFunctions
+  IDataObject,
+  IHttpRequestOptions,
+  IHttpRequestMethods,
 } from 'n8n-workflow';
 
 export class WhatsAppDirectTrigger implements INodeType {
