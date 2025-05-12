@@ -52,25 +52,21 @@ export class WhatsAppDirectTrigger implements INodeType {
   };
 
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
+     try {
     const req = this.getRequestObject();
     const method = req.method;
     const query = req.query || {};
+    const headers = req.headers;
 
-    // Obtener tokens desde los parámetros del nodo
-    const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
-    const APP_SECRET = this.getNodeParameter('appSecret') as string;
-
-    console.log('=================== WEBHOOK RECIBIDO ===================', {
-    timestamp: new Date().toISOString(),
-    method: req.method,
-    path: req.path
-  });
-    // Registro detallado
-    console.log('Webhook Meta - Detalles:', {
+    console.log('WEBHOOK - SOLICITUD COMPLETA:', {
+      timestamp: new Date().toISOString(),
       method,
-      query: JSON.stringify(query),
-      verifyToken: VERIFY_TOKEN,
-      appSecret: APP_SECRET ? '[REDACTADO]' : 'No proporcionado'
+      path: req.path,
+      fullHeaders: Object.keys(headers),
+      queryParams: Object.keys(query),
+      rawQuery: JSON.stringify(query),
+      bodyType: typeof req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : 'No body'
     });
 
  // Verificación de suscripción (GET)
@@ -181,6 +177,21 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
       webhookResponse: {
         statusCode: 400,
         body: 'Solicitud no válida'
+      }
+    };
+
+        } catch (error) {
+    console.error('ERROR GLOBAL EN WEBHOOK:', {
+      message: error.message,
+      stack: error.stack,
+      method: req.method,
+      path: req.path
+    });
+
+    return {
+      webhookResponse: {
+        statusCode: 500,
+        body: 'Error interno del servidor'
       }
     };
   }
