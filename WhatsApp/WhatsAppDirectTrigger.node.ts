@@ -179,7 +179,7 @@ if (method === 'GET' && query['hub.mode'] === 'subscribe') {
         body: 'Solicitud no válida'
       }
     };
- catch (error) {
+     } catch (error) {
     console.error('ERROR GLOBAL EN WEBHOOK:', {
       message: error.message,
       stack: error.stack,
