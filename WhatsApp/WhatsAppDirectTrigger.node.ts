@@ -1,9 +1,11 @@
-import { ITriggerFunctions } from 'n8n-core';
+import {  } from 'n8n-core';
 import {
  INodeExecutionData,
   INodeType,
   INodeTypeDescription,
    ITriggerResponse,
+  IWebhookResponseData,
+  IWebhookFunctions,  // Añade esta importación
   IWebhookResponseData,
   NodeOperationError,
   IExecuteFunctions, // Cambiar NodeExecuteFunctions por IExecuteFunctions
@@ -132,7 +134,7 @@ export class WhatsAppDirectTrigger implements INodeType {
     ],
   };
 
-  async webhook(this: ITriggerFunctions): Promise<IWebhookResponseData> {
+ async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     const req = this.getRequestObject();
     const authentication = this.getNodeParameter('authentication') as string;
     const onlyMessages = this.getNodeParameter('onlyMessages', true) as boolean;
