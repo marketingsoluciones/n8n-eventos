@@ -97,6 +97,10 @@ export class WhatsAppDirectTrigger implements INodeType {
     const req = this.getRequestObject();
     const method = req.method;
     const authentication = this.getNodeParameter('authentication') as string;
+    const query = req.query || {};
+    // Verificación de token de WhatsApp
+  const VERIFY_TOKEN = 'miTokenWhatsApp2025'; 
+
     
     console.log('Webhook recibido:', {
       method: req.method,
@@ -112,34 +116,48 @@ export class WhatsAppDirectTrigger implements INodeType {
       console.log(`[WhatsApp] Solicitud de verificación de webhook: ${JSON.stringify(query)}`);
       
       // Verificar si es una solicitud de verificación de Meta
-      if (
-        query['hub.mode'] === 'subscribe' &&
-        query['hub.verify_token'] !== undefined
-      ) {
-        const verifyToken = this.getNodeParameter('metaVerifyToken') as string;
-        const mode = query['hub.mode'];
-        const token = query['hub.verify_token'];
-        const challenge = query['hub.challenge'];
-        
-        console.log(`[WhatsApp] Verificación Meta: token recibido=${token}, token esperado=${verifyToken}`);
-        
-        if (mode === 'subscribe' && token === verifyToken) {
-          console.log(`[WhatsApp] Verificación de webhook exitosa, devolviendo challenge: ${challenge}`);
-          return {
-            webhookResponse: {
-              statusCode: 200,
-              body: challenge,
-            },
-          };
-        } else {
-          console.log('[WhatsApp] Token de verificación inválido');
-          return {
-            webhookResponse: {
-              statusCode: 403,
-              body: 'Forbidden: token de verificación inválido',
-            },
-          };
+  if (query['hub.mode'] === 'subscribe') {
+    const receivedToken = query['hub.verify_token'];
+    const challenge = query['hub.challenge'];
+
+    if (receivedToken === VERIFY_TOKEN) {
+      return {
+        webhookResponse: {
+          statusCode: 200,
+          body: challenge
         }
+      };
+    } else {
+      console.error('Token de verificación inválido:', receivedToken);
+      return {
+        webhookResponse: {
+          statusCode: 403,
+          body: 'Verification token failed'
+        }
+      };
+    }
+  }
+
+  // Manejo de mensajes de webhook
+  const body = req.body;
+  if (body) {
+    // Procesar mensaje de WhatsApp
+    return {
+      webhookResponse: {
+        statusCode: 200,
+        body: { success: true }
+      },
+      workflowData: [this.helpers.returnJsonArray(body)]
+    };
+  }
+
+  return {
+    webhookResponse: {
+      statusCode: 400,
+      body: { error: 'Invalid request' }
+    }
+  };
+      
       }
     }
 
