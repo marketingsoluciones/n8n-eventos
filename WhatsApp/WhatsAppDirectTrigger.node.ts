@@ -24,7 +24,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       {
         name: 'default',
         httpMethod: 'GET,POST',
-        responseMode: 'lastNode',
+        responseMode: 'onReceived',
         path: 'webhook',
       },
     ],
@@ -94,29 +94,23 @@ const challenge = query['hub.challenge'];
 const VERIFY_TOKEN = this.getNodeParameter('verificationToken') as string;
 
  // Modifica esta parte en tu WhatsAppDirectTrigger.node.ts
-// REEMPLAZAR CON ESTE CÓDIGO
 if (receivedToken === VERIFY_TOKEN) {
   console.log('Verificación de Token Meta - ÉXITO', {
     challengeReceived: challenge,
     challengeLength: challenge.length,
     challengeType: typeof challenge 
   });
- console.log('Respuesta exacta que se enviará:', challenge);  // Crear objeto de respuesta
-  const responseObj = {
+
+  // Respuesta extremadamente simplificada
+  return {
     webhookResponse: {
       statusCode: 200,
-      body: String(challenge), // Asegurarse de que sea string puro
+      body: challenge, // Sin String() para mantenerlo lo más puro posible
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8' // Charset explícito
+        'Content-Type': 'text/plain' // Sin charset
       }
     }
   };
-  
-  // Loguear el objeto completo para depuración
-  console.log('RESPUESTA COMPLETA QUE SE ENVIARÁ:', JSON.stringify(responseObj, null, 2));
- 
-  
-  return responseObj;
 } else {
     console.error('Error de Verificación de Token Meta:', {
       receivedToken,
