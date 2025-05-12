@@ -1,4 +1,3 @@
-
 import {
   IExecuteFunctions,
   IWebhookFunctions,
@@ -98,10 +97,10 @@ export class WhatsAppDirectTrigger implements INodeType {
     const method = req.method;
     const authentication = this.getNodeParameter('authentication') as string;
     const query = req.query || {};
-    // Verificación de token de WhatsApp
-  const VERIFY_TOKEN = 'miTokenWhatsApp2025'; 
-
     
+    // Verificación de token de WhatsApp
+    const VERIFY_TOKEN = 'miTokenWhatsApp2025'; 
+
     console.log('Webhook recibido:', {
       method: req.method,
       path: req.path,
@@ -111,54 +110,49 @@ export class WhatsAppDirectTrigger implements INodeType {
 
     // Verificación de Meta (GET request)
     if (method === 'GET') {
-      const query = req.query;
-      
       console.log(`[WhatsApp] Solicitud de verificación de webhook: ${JSON.stringify(query)}`);
       
       // Verificar si es una solicitud de verificación de Meta
-  if (query['hub.mode'] === 'subscribe') {
-    const receivedToken = query['hub.verify_token'];
-    const challenge = query['hub.challenge'];
+      if (query['hub.mode'] === 'subscribe') {
+        const receivedToken = query['hub.verify_token'];
+        const challenge = query['hub.challenge'];
 
-    if (receivedToken === VERIFY_TOKEN) {
-      return {
-        webhookResponse: {
-          statusCode: 200,
-          body: challenge
+        if (receivedToken === VERIFY_TOKEN) {
+          return {
+            webhookResponse: {
+              statusCode: 200,
+              body: challenge
+            }
+          };
+        } else {
+          console.error('Token de verificación inválido:', receivedToken);
+          return {
+            webhookResponse: {
+              statusCode: 403,
+              body: 'Verification token failed'
+            }
+          };
         }
-      };
-    } else {
-      console.error('Token de verificación inválido:', receivedToken);
-      return {
-        webhookResponse: {
-          statusCode: 403,
-          body: 'Verification token failed'
-        }
-      };
-    }
-  }
-
-  // Manejo de mensajes de webhook
-  const body = req.body;
-  if (body) {
-    // Procesar mensaje de WhatsApp
-    return {
-      webhookResponse: {
-        statusCode: 200,
-        body: { success: true }
-      },
-      workflowData: [this.helpers.returnJsonArray(body)]
-    };
-  }
-
-  return {
-    webhookResponse: {
-      statusCode: 400,
-      body: { error: 'Invalid request' }
-    }
-  };
-      
       }
+
+      // Manejo de otros mensajes GET
+      const body = req.body;
+      if (body) {
+        return {
+          webhookResponse: {
+            statusCode: 200,
+            body: { success: true }
+          },
+          workflowData: [this.helpers.returnJsonArray(body)]
+        };
+      }
+
+      return {
+        webhookResponse: {
+          statusCode: 400,
+          body: { error: 'Invalid request' }
+        }
+      };
     }
 
     // Manejo de solicitudes POST
