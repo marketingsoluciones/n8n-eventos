@@ -135,7 +135,7 @@ try {
         'Content-Type': 'text/plain',
       },
     },
-  };}
+  };
     } else if (method === 'POST') {
       // Handle incoming messages
       try {
