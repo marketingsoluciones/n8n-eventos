@@ -48,6 +48,15 @@ export class WhatsAppNativeWebhook implements INodeType {
     const headerData = this.getHeaderData();
     const method = req.method;
 
+    // depuracion a bajo nivel 
+try {
+  console.log('Request headers:', JSON.stringify(req.headers));
+  console.log('Request path:', req.path);
+  console.log('Request originalUrl:', req.originalUrl || 'not available');
+  console.log('Request protocol:', req.protocol || 'not available');
+} catch (e) {
+  console.log('Error accessing request properties:', e);
+}
     console.log('WhatsApp Native Webhook - Request Received:', {
       method,
       headers: headerData,
@@ -71,8 +80,14 @@ export class WhatsAppNativeWebhook implements INodeType {
         if (mode === 'subscribe' && token === verificationToken) {
           console.log('Verification Successful! Returning challenge:', challenge);
           
-// Definir la respuesta primero
-  const response = {
+          //  Verificar el procesamiento de la respuesta
+  const rawChallenge = challenge;
+  console.log('Challenge raw type:', typeof rawChallenge);
+  console.log('Challenge raw value:', rawChallenge);// Definir la respuesta primero
+  
+          
+          
+          const response = {
     webhookResponse: {
       statusCode: 200,
       headers: {
