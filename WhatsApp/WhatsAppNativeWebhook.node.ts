@@ -87,43 +87,38 @@ export class WhatsAppNativeWebhook implements INodeType {
             console.log('Challenge raw type:', typeof rawChallenge);
             console.log('Challenge raw value:', rawChallenge);
             
-            const response = {
-              webhookResponse: {
-                statusCode: 200,
-                headers: {
-                  'Content-Type': 'text/plain; charset=utf-8',
-                  'Cache-Control': 'no-store',
-                },
-                body: challenge,
-              },
-            };
+            const  return [{
+                   json: {
+                      responseCode: 200,
+                       responseContentType: 'text/plain',
+                        responseBody: challenge
+                    }
+                      }];
             
-            // Registrar la respuesta antes de devolverla
-            console.log('RESPUESTA FINAL ENVIADA:', JSON.stringify(response));
-            
-            // Devolver la respuesta
-            return response;
+          
+           
           } else {
             console.log('Verification Failed! Token mismatch or mode incorrect');
-            return {
-              webhookResponse: {
-                statusCode: 403,
-                body: 'Forbidden',
-              },
-            };
+               return [{
+                      json: {
+                        responseCode: 403,
+                        responseContentType: 'text/plain',
+                        responseBody: 'Forbidden'
+                      }
+                    }];
           }
         } catch (error) {
           console.error('Error in GET webhook handling:', error);
           // Respuesta segura sin referencias a this.getNode()
-          return {
-            webhookResponse: {
-              statusCode: 200, // Usar 200 en lugar de 500 para aceptar la verificación
-              body: 'Error handled', // Texto plano en lugar de JSON
-              headers: {
-                'Content-Type': 'text/plain',
-              },
-            },
-          };
+         // Simplemente procesar el mensaje
+                return [{
+                  json: {
+                    responseCode: 200,
+                    responseContentType: 'application/json',
+                    responseBody: JSON.stringify({ success: true }),
+                    messageData: body
+                  }
+                }];
         }
       } else if (method === 'POST') {
         // Handle incoming messages
@@ -134,16 +129,14 @@ export class WhatsAppNativeWebhook implements INodeType {
           
           if (body.object === 'whatsapp_business_account') {
             // Process the WhatsApp message data
-            return {
-              webhookResponse: {
-                statusCode: 200,
-                body: JSON.stringify({ success: true }),
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              },
-              workflowData: [this.helpers.returnJsonArray(body)],
-            };
+           return [{
+                json: {
+                  responseCode: 200,
+                  responseContentType: 'application/json',
+                  responseBody: JSON.stringify({ success: true }),
+                  messageData: body
+                }
+              }];
           } else {
             return {
               webhookResponse: {
@@ -158,38 +151,38 @@ export class WhatsAppNativeWebhook implements INodeType {
         } catch (error) {
           console.error('Error in POST webhook handling:', error);
           // Respuesta segura sin referencias a this.getNode()
-          return {
-            webhookResponse: {
-              statusCode: 200, // Usar 200 incluso con error para no causar reintentos
-              body: JSON.stringify({ success: true, message: 'Error handled' }),
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-          };
+         // Simplemente procesar el mensaje
+            return [{
+              json: {
+                responseCode: 200,
+                responseContentType: 'application/json',
+                responseBody: JSON.stringify({ success: true }),
+                messageData: body
+              }
+            }];
         }
       } else {
         // Handle unsupported methods
-        return {
-          webhookResponse: {
-            statusCode: 405,
-            body: `Method Not Allowed: ${method}`,
-          },
-        };
+                    return [{
+              json: {
+                responseCode: 405,
+                responseContentType: 'text/plain',
+                responseBody: 'Method Not Allowed'
+              }
+            }];
       }
     } catch (error) { // Cierre del try-catch general
       console.error('General webhook error:', error);
       
       // Respuesta genérica para cualquier error
-      return {
-        webhookResponse: {
-          statusCode: 200,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-          body: 'OK',
-        },
-      };
+      return [{
+              json: {
+                responseCode: 200,
+                responseContentType: 'application/json',
+                responseBody: JSON.stringify({ success: true }),
+                messageData: body
+              }
+            }];
     }
   }
 }
