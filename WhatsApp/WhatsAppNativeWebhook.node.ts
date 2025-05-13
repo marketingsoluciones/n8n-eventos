@@ -97,9 +97,18 @@ export class WhatsAppNativeWebhook implements INodeType {
           };
         }
       } catch (error) {
-        console.error('Error in GET webhook handling:', error);
-        throw new NodeOperationError(this.getNode(), error as Error);
-      }
+  console.error('Error in GET webhook handling:', error);
+  // En lugar de usar this.getNode() que es undefined
+  return {
+    webhookResponse: {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Error processing webhook verification' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  };
+}
     } else if (method === 'POST') {
       // Handle incoming messages
       try {
@@ -130,10 +139,19 @@ export class WhatsAppNativeWebhook implements INodeType {
             },
           };
         }
-      } catch (error) {
-        console.error('Error in POST webhook handling:', error);
-        throw new NodeOperationError(this.getNode(), error as Error);
-      }
+     } catch (error) {
+  console.error('Error in POST webhook handling:', error);
+  // En lugar de usar this.getNode() que es undefined
+  return {
+    webhookResponse: {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Error processing webhook message' }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  };
+}
     } else {
       // Handle unsupported methods
       return {
