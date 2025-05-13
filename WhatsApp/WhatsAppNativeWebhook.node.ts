@@ -4,7 +4,6 @@ import {
   IWebhookFunctions,
   IWebhookResponseData,
   IDataObject,
-  NodeOperationError,
 } from 'n8n-workflow';
 
 export class WhatsAppNativeWebhook implements INodeType {
@@ -43,146 +42,151 @@ export class WhatsAppNativeWebhook implements INodeType {
 
   // This is the function that will be called when the webhook gets triggered
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-    try { // Inicio del try-catch general
+    try {
       const req = this.getRequestObject();
       const verificationToken = this.getNodeParameter('verificationToken') as string;
-      const headerData = this.getHeaderData();
       const method = req.method;
 
-      // depuracion a bajo nivel 
-      try {
-        console.log('Request headers:', JSON.stringify(req.headers));
-        console.log('Request path:', req.path);
-        console.log('Request originalUrl:', req.originalUrl || 'not available');
-        console.log('Request protocol:', req.protocol || 'not available');
-      } catch (error) {
-        console.log('Error accessing request properties:', error);
-      }
+      // Depuración detallada
+      console.log(`[META-DEBUG] Request method: ${method}`);
+      console.log(`[META-DEBUG] Request headers: ${JSON.stringify(req.headers)}`);
+      console.log(`[META-DEBUG] Request path: ${req.path}`);
+      console.log(`[META-DEBUG] Request query: ${JSON.stringify(req.query)}`);
       
-      console.log('WhatsApp Native Webhook - Request Received:', {
-        method,
-        headers: headerData,
-        path: req.path,
-        query: req.query,
-      });
-
       if (method === 'GET') {
-        // Handle webhook verification (Meta verification process)
+        // Procesamiento de verificación de webhook
         try {
           const query = req.query as IDataObject;
           
-          console.log('GET Request Query Parameters:', query);
+          console.log(`[META-DEBUG] GET query parameters: ${JSON.stringify(query)}`);
           
           const mode = query['hub.mode'] as string;
           const token = query['hub.verify_token'] as string;
           const challenge = query['hub.challenge'] as string;
           
-          console.log('Verification Data:', { mode, token, verificationToken, challenge });
+          console.log(`[META-DEBUG] Verification mode: ${mode}`);
+          console.log(`[META-DEBUG] Verification token received: ${token}`);
+          console.log(`[META-DEBUG] Verification token configured: ${verificationToken}`);
+          console.log(`[META-DEBUG] Challenge value: ${challenge}`);
           
           if (mode === 'subscribe' && token === verificationToken) {
-            console.log('Verification Successful! Returning challenge:', challenge);
+            console.log(`[META-DEBUG] Verification successful, returning challenge`);
             
-            // Verificar el procesamiento de la respuesta
-            const rawChallenge = challenge;
-            console.log('Challenge raw type:', typeof rawChallenge);
-            console.log('Challenge raw value:', rawChallenge);
+            // Crear la respuesta exactamente como Meta la espera
+            const response = {
+              webhookResponse: {
+                statusCode: 200,
+                headers: {
+                  'Content-Type': 'text/plain',
+                },
+                body: challenge,
+              },
+            };
             
-            return [{
-                   json: {
-                      responseCode: 200,
-                       responseContentType: 'text/plain',
-                        responseBody: challenge
-                    }
-                   }];
-            
-          
-           
+            console.log(`[META-DEBUG] Response: ${JSON.stringify(response)}`);
+            return response;
           } else {
-            console.log('Verification Failed! Token mismatch or mode incorrect');
-               return [{
-                      json: {
-                        responseCode: 403,
-                        responseContentType: 'text/plain',
-                        responseBody: 'Forbidden'
-                      }
-                    }];
-          }
-        } catch (error) {
-          console.error('Error in GET webhook handling:', error);
-          // Respuesta segura sin referencias a this.getNode()
-         // Simplemente procesar el mensaje
-                return [{
-                  json: {
-                    responseCode: 200,
-                    responseContentType: 'application/json',
-                    responseBody: JSON.stringify({ success: true }),
-                    messageData: body
-                  }
-                }];
-        }
-      } else if (method === 'POST') {
-        // Handle incoming messages
-        try {
-          const body = req.body as IDataObject;
-          
-          console.log('POST Request Body:', body);
-          
-          if (body.object === 'whatsapp_business_account') {
-            // Process the WhatsApp message data
-           return [{
-                json: {
-                  responseCode: 200,
-                  responseContentType: 'application/json',
-                  responseBody: JSON.stringify({ success: true }),
-                  messageData: body
-                }
-              }];
-          } else {
+            console.log(`[META-DEBUG] Verification failed`);
+            if (mode !== 'subscribe') {
+              console.log(`[META-DEBUG] Invalid mode: ${mode}`);
+            }
+            if (token !== verificationToken) {
+              console.log(`[META-DEBUG] Token mismatch: ${token} !== ${verificationToken}`);
+            }
+            
             return {
               webhookResponse: {
-                statusCode: 400,
-                body: JSON.stringify({ success: false, error: 'Invalid webhook data' }),
+                statusCode: 403,
                 headers: {
-                  'Content-Type': 'application/json',
+                  'Content-Type': 'text/plain',
                 },
+                body: 'Forbidden',
               },
             };
           }
         } catch (error) {
-          console.error('Error in POST webhook handling:', error);
-          // Respuesta segura sin referencias a this.getNode()
-         // Simplemente procesar el mensaje
-            return [{
-              json: {
-                responseCode: 200,
-                responseContentType: 'application/json',
-                responseBody: JSON.stringify({ success: true }),
-                messageData: body
-              }
-            }];
+          console.error(`[META-DEBUG] Error in GET handler: ${error.message}`);
+          return {
+            webhookResponse: {
+              statusCode: 200,
+              headers: {
+                'Content-Type': 'text/plain',
+              },
+              body: 'Error',
+            },
+          };
+        }
+      } else if (method === 'POST') {
+        // Procesamiento de mensajes entrantes
+        try {
+          const body = req.body as IDataObject;
+          
+          console.log(`[META-DEBUG] POST body: ${JSON.stringify(body)}`);
+          
+          if (body.object === 'whatsapp_business_account') {
+            console.log(`[META-DEBUG] Valid WhatsApp message received`);
+            
+            return {
+              webhookResponse: {
+                statusCode: 200,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ success: true }),
+              },
+              workflowData: [this.helpers.returnJsonArray(body)],
+            };
+          } else {
+            console.log(`[META-DEBUG] Invalid object type: ${body.object}`);
+            
+            return {
+              webhookResponse: {
+                statusCode: 200,  // Siempre responder 200 para evitar reintentos
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ success: true }),
+              },
+            };
+          }
+        } catch (error) {
+          console.error(`[META-DEBUG] Error in POST handler: ${error.message}`);
+          
+          return {
+            webhookResponse: {
+              statusCode: 200,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ success: true }),
+            },
+          };
         }
       } else {
-        // Handle unsupported methods
-                    return [{
-              json: {
-                responseCode: 405,
-                responseContentType: 'text/plain',
-                responseBody: 'Method Not Allowed'
-              }
-            }];
+        console.log(`[META-DEBUG] Unsupported method: ${method}`);
+        
+        return {
+          webhookResponse: {
+            statusCode: 405,
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+            body: 'Method Not Allowed',
+          },
+        };
       }
-    } catch (error) { // Cierre del try-catch general
-      console.error('General webhook error:', error);
+    } catch (error) {
+      console.error(`[META-DEBUG] Global error: ${error.message}`);
       
-      // Respuesta genérica para cualquier error
-      return [{
-              json: {
-                responseCode: 200,
-                responseContentType: 'application/json',
-                responseBody: JSON.stringify({ success: true }),
-                messageData: body
-              }
-            }];
+      return {
+        webhookResponse: {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: 'OK',
+        },
+      };
     }
   }
 }
