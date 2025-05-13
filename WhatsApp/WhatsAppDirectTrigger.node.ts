@@ -135,6 +135,71 @@ export class WhatsAppDirectTrigger implements INodeType {
 
  async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     const req = this.getRequestObject();
+// inicio del codigo insetado para validacion  y registrase en meta
+  // Verificar si es una solicitud GET para verificación de webhook
+if (req.method === 'GET') {
+  console.log('Recibida solicitud GET para verificación:', req.query);
+  const query = req.query;
+  
+  // Verificación para WhatsApp Business API de Meta
+  if (query['hub.mode'] === 'subscribe' && query['hub.verify_token'] !== undefined) {
+    try {
+      // Obtener el token configurado en el nodo
+      const configToken = this.getNodeParameter('token') as string;
+      const incomingToken = query['hub.verify_token'] as string;
+      
+      console.log(`Verificación de webhook - Token recibido: ${incomingToken}, Token configurado: ${configToken}`);
+      
+      // Verificar que el token coincida
+      if (incomingToken === configToken) {
+        // Si el token coincide, devolver el valor de challenge
+        const challenge = query['hub.challenge'] as string;
+        console.log(`Verificación exitosa, devolviendo challenge: ${challenge}`);
+        
+        return {
+          webhookResponse: {
+            statusCode: 200,
+            body: challenge,
+          },
+        };
+      } else {
+        // Si el token no coincide, devolver error
+        console.log('Error de verificación: token no coincide');
+        
+        return {
+          webhookResponse: {
+            statusCode: 403,
+            body: {
+              error: 'Verification token mismatch',
+            },
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error durante verificación:', error);
+      
+      return {
+        webhookResponse: {
+          statusCode: 500,
+          body: {
+            error: 'Internal server error during verification',
+          },
+        },
+      };
+    }
+  }
+  
+  // Para otras solicitudes GET no reconocidas
+  return {
+    webhookResponse: {
+      statusCode: 400,
+      body: {
+        error: 'Invalid verification request',
+      },
+    },
+  };
+}
+  //  fin del codigo insertado para el get de validacion
     const authentication = this.getNodeParameter('authentication') as string;
     const onlyMessages = this.getNodeParameter('onlyMessages', true) as boolean;
     const includeMedia = this.getNodeParameter('includeMedia', true) as boolean;
