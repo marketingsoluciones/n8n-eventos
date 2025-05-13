@@ -71,18 +71,22 @@ export class WhatsAppNativeWebhook implements INodeType {
         if (mode === 'subscribe' && token === verificationToken) {
           console.log('Verification Successful! Returning challenge:', challenge);
           
-          // Critical: Return exactly the challenge as the response body
-          return {
-            webhookResponse: {
-              statusCode: 200,
-                 headers: {
-                'Content-Type': 'text/plain',
-              },
-              body: challenge,
-               //   encoding: 'raw', 
-            },
-          };
-            console.log('RESPUESTA FINAL ENVIADA:', JSON.stringify(response));
+// Definir la respuesta primero
+  const response = {
+    webhookResponse: {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: challenge,
+    },
+  };
+  
+  // Registrar la respuesta antes de devolverla
+  console.log('RESPUESTA FINAL ENVIADA:', JSON.stringify(response));
+  
+  // Devolver la respuesta
+  return response;
         } else {
           console.log('Verification Failed! Token mismatch or mode incorrect');
           return {
