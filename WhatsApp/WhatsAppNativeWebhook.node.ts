@@ -82,6 +82,7 @@ export class WhatsAppNativeWebhook implements INodeType {
                //   encoding: 'raw', 
             },
           };
+            console.log('RESPUESTA FINAL ENVIADA:', JSON.stringify(response));
         } else {
           console.log('Verification Failed! Token mismatch or mode incorrect');
           return {
