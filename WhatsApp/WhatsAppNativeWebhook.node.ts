@@ -26,7 +26,7 @@ export class WhatsAppNativeWebhook implements INodeType {
         name: 'default',
         httpMethod: 'GET,POST',
         responseMode: 'lastNode',
-        path: 'webhook',
+        path: '',
       },
     ],
     properties: [
