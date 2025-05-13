@@ -25,7 +25,7 @@ export class WhatsAppNativeWebhook implements INodeType {
       {
         name: 'default',
         httpMethod: 'GET,POST',
-        responseMode: 'onReceived',
+        responseMode: 'lastNode',
         path: 'webhook',
       },
     ],
@@ -79,7 +79,7 @@ export class WhatsAppNativeWebhook implements INodeType {
                 'Content-Type': 'text/plain',
               },
               body: challenge,
-                  encoding: 'raw', 
+               //   encoding: 'raw', 
             },
           };
         } else {
