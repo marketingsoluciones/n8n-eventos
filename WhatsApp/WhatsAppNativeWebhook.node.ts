@@ -87,13 +87,13 @@ export class WhatsAppNativeWebhook implements INodeType {
             console.log('Challenge raw type:', typeof rawChallenge);
             console.log('Challenge raw value:', rawChallenge);
             
-            const  return [{
+            return [{
                    json: {
                       responseCode: 200,
                        responseContentType: 'text/plain',
                         responseBody: challenge
                     }
-                      }];
+                   }];
             
           
            
