@@ -36,7 +36,8 @@
     "nodes": [
       "dist/WhatsApp/WhatsAppDirectNode.node.js",
       "dist/WhatsApp/WhatsAppDirectTrigger.node.js",
-       "dist/WhatsApp/WhatsAppNativeWebhook.node.js"
+       "dist/WhatsApp/WhatsAppNativeWebhook.node.js",
+       "dist/WhatsApp/SimpleWebhook.node.js"
     ]
   },
  
