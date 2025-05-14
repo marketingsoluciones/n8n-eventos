@@ -1,8 +1,3 @@
-# Crear un directorio para los nodos personalizados si no existe
-mkdir -p /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes
-
-# Crear el archivo WhatsAppNativeWebhook.node.ts corregido
-cat > /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/WhatsAppNativeWebhook.node.ts << 'EOF'
 import {
   INodeType,
   INodeTypeDescription,
@@ -143,10 +138,3 @@ export class WhatsAppNativeWebhook implements INodeType {
     }
   }
 }
-EOF
-
-# Copiar los demás archivos
-cp /ruta/a/los/archivos/WhatsApp/SimpleWebhook.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
-cp /ruta/a/los/archivos/WhatsApp/WhatsAppDirectNode.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
-cp /ruta/a/los/archivos/WhatsApp/WhatsAppDirectTrigger.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
-cp /ruta/a/los/archivos/WhatsApp/whatsapp.svg /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
