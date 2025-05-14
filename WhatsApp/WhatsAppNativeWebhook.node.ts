@@ -47,11 +47,7 @@ export class WhatsAppNativeWebhook implements INodeType {
       const verificationToken = this.getNodeParameter('verificationToken') as string;
       const method = req.method;
 
-      // Depuración detallada
       console.log(`[META-DEBUG] Request method: ${method}`);
-      console.log(`[META-DEBUG] Request headers: ${JSON.stringify(req.headers)}`);
-      console.log(`[META-DEBUG] Request path: ${req.path}`);
-      console.log(`[META-DEBUG] Request query: ${JSON.stringify(req.query)}`);
       
       if (method === 'GET') {
         // Procesamiento de verificación de webhook
@@ -70,10 +66,11 @@ export class WhatsAppNativeWebhook implements INodeType {
           console.log(`[META-DEBUG] Challenge value: ${challenge}`);
           
           if (mode === 'subscribe' && token === verificationToken) {
-            console.log(`[META-DEBUG] Verification successful, returning challenge`);
+            console.log(`[META-DEBUG] Verification successful, returning challenge: ${challenge}`);
             
-            // Crear la respuesta exactamente como Meta la espera
-            const response = {
+            // IMPORTANTE: Devolver el challenge como texto plano directamente,
+            // no como un objeto JSON o estructura compleja
+            return {
               webhookResponse: {
                 statusCode: 200,
                 headers: {
@@ -82,17 +79,8 @@ export class WhatsAppNativeWebhook implements INodeType {
                 body: challenge,
               },
             };
-            
-            console.log(`[META-DEBUG] Response: ${JSON.stringify(response)}`);
-            return response;
           } else {
             console.log(`[META-DEBUG] Verification failed`);
-            if (mode !== 'subscribe') {
-              console.log(`[META-DEBUG] Invalid mode: ${mode}`);
-            }
-            if (token !== verificationToken) {
-              console.log(`[META-DEBUG] Token mismatch: ${token} !== ${verificationToken}`);
-            }
             
             return {
               webhookResponse: {
@@ -108,11 +96,11 @@ export class WhatsAppNativeWebhook implements INodeType {
           console.error(`[META-DEBUG] Error in GET handler: ${error.message}`);
           return {
             webhookResponse: {
-              statusCode: 200,
+              statusCode: 500,
               headers: {
                 'Content-Type': 'text/plain',
               },
-              body: 'Error',
+              body: 'Error: ' + error.message,
             },
           };
         }
@@ -121,7 +109,7 @@ export class WhatsAppNativeWebhook implements INodeType {
         try {
           const body = req.body as IDataObject;
           
-          console.log(`[META-DEBUG] POST body: ${JSON.stringify(body)}`);
+          console.log(`[META-DEBUG] POST body: ${JSON.stringify(body).substring(0, 200)}...`);
           
           if (body.object === 'whatsapp_business_account') {
             console.log(`[META-DEBUG] Valid WhatsApp message received`);
@@ -141,7 +129,7 @@ export class WhatsAppNativeWebhook implements INodeType {
             
             return {
               webhookResponse: {
-                statusCode: 200,  // Siempre responder 200 para evitar reintentos
+                statusCode: 200, 
                 headers: {
                   'Content-Type': 'application/json',
                 },
