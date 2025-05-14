@@ -1,3 +1,8 @@
+# Crear un directorio para los nodos personalizados si no existe
+mkdir -p /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes
+
+# Crear el archivo WhatsAppNativeWebhook.node.ts corregido
+cat > /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/WhatsAppNativeWebhook.node.ts << 'EOF'
 import {
   INodeType,
   INodeTypeDescription,
@@ -47,52 +52,50 @@ export class WhatsAppNativeWebhook implements INodeType {
       console.log('WhatsAppNativeWebhook received request:', req.method);
       
       // GET request handling (for verification)
-    
-    // GET request handling (for verification)
-    if (req.method === 'GET') {
-      console.log('Processing GET request (webhook verification)');
-      
-      // If there's a challenge parameter, check verification token and return challenge
-      const mode = req.query['hub.mode'] as string;
-      const token = req.query['hub.verify_token'] as string;
-      const challenge = req.query['hub.challenge'] as string;
-      
-      // Get verification token from node parameters
-      let verificationToken;
-      try {
-        verificationToken = this.getNodeParameter('verificationToken') as string;
-      } catch (error) {
-        console.error('Error getting verification token, using default:', error.message);
-        verificationToken = 'token2022'; // Fallback
-      }
-      
-      console.log('Verification params:', {
-        mode,
-        receivedToken: token,
-        configuredToken: verificationToken,
-        challenge
-      });
-      
-      if (mode === 'subscribe' && token === verificationToken) {
-        console.log('Verification successful, returning challenge:', challenge);
+      if (req.method === 'GET') {
+        console.log('Processing GET request (webhook verification)');
         
-        // CRUCIAL: Devuelve SOLO el challenge como texto plano sin formato JSON
-        return {
-          webhookResponse: challenge,
-        };
-      } else {
-        console.log('Verification failed');
-        return {
-          webhookResponse: {
-            statusCode: 403,
-            headers: {
-              'Content-Type': 'text/plain',
+        // If there's a challenge parameter, check verification token and return challenge
+        const mode = req.query['hub.mode'] as string;
+        const token = req.query['hub.verify_token'] as string;
+        const challenge = req.query['hub.challenge'] as string;
+        
+        // Get verification token from node parameters
+        let verificationToken;
+        try {
+          verificationToken = this.getNodeParameter('verificationToken') as string;
+        } catch (error) {
+          console.error('Error getting verification token, using default:', error.message);
+          verificationToken = 'token2022'; // Fallback
+        }
+        
+        console.log('Verification params:', {
+          mode,
+          receivedToken: token,
+          configuredToken: verificationToken,
+          challenge
+        });
+        
+        if (mode === 'subscribe' && token === verificationToken) {
+          console.log('Verification successful, returning challenge:', challenge);
+          
+          // CRUCIAL: Devuelve SOLO el challenge como texto plano sin formato JSON
+          return {
+            webhookResponse: challenge,
+          };
+        } else {
+          console.log('Verification failed');
+          return {
+            webhookResponse: {
+              statusCode: 403,
+              headers: {
+                'Content-Type': 'text/plain',
+              },
+              body: 'Forbidden',
             },
-            body: 'Forbidden',
-          },
-        };
+          };
+        }
       }
-      
       // POST request handling (for receiving messages)
       else if (req.method === 'POST') {
         console.log('Processing POST request (incoming webhook)');
@@ -110,7 +113,6 @@ export class WhatsAppNativeWebhook implements INodeType {
           workflowData: [this.helpers.returnJsonArray(body)],
         };
       } 
-      
       // Default response for other methods
       else {
         console.log('Unsupported method:', req.method);
@@ -141,3 +143,10 @@ export class WhatsAppNativeWebhook implements INodeType {
     }
   }
 }
+EOF
+
+# Copiar los demás archivos
+cp /ruta/a/los/archivos/WhatsApp/SimpleWebhook.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
+cp /ruta/a/los/archivos/WhatsApp/WhatsAppDirectNode.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
+cp /ruta/a/los/archivos/WhatsApp/WhatsAppDirectTrigger.node.ts /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
+cp /ruta/a/los/archivos/WhatsApp/whatsapp.svg /opt/n8n-docker-caddy/custom-nodes/WhatsAppNodes/
