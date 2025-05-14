@@ -3,6 +3,7 @@ import {
   INodeTypeDescription,
   IWebhookFunctions,
   IWebhookResponseData,
+  IDataObject,
 } from 'n8n-workflow';
 
 export class SimpleWebhook implements INodeType {
@@ -47,6 +48,8 @@ export class SimpleWebhook implements INodeType {
           },
           body: challenge,
         },
+        // Usar helpers.returnJsonArray para crear el formato correcto
+        workflowData: [this.helpers.returnJsonArray({ received: true })],
       };
     }
     
@@ -56,7 +59,8 @@ export class SimpleWebhook implements INodeType {
         statusCode: 200,
         body: 'OK from SimpleWebhook',
       },
-      workflowData: [{ json: { received: true } }],
+      // Usar helpers.returnJsonArray para crear el formato correcto
+      workflowData: [this.helpers.returnJsonArray({ received: true })],
     };
   }
 }
