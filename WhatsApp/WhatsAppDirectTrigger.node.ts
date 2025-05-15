@@ -14,7 +14,7 @@ export class WhatsAppDirectTrigger implements INodeType {
     icon: 'file:whatsapp.svg',
     group: ['trigger'],
     version: 1,
-    description: 'Starts the workflow when a WhatsApp message is received',
+    description: 'Starts the workflow when a WhatsApp message is received via proxy',
     defaults: {
       name: 'WhatsApp Direct Trigger',
       color: '#25D366',
@@ -45,7 +45,7 @@ export class WhatsAppDirectTrigger implements INodeType {
           },
         ],
         default: 'none',
-        description: 'The method to authenticate webhook requests',
+        description: 'The method to authenticate webhook requests from your proxy',
       },
       {
         displayName: 'Token',
@@ -58,7 +58,7 @@ export class WhatsAppDirectTrigger implements INodeType {
             authentication: ['token'],
           },
         },
-        description: 'The token to use for authentication',
+        description: 'The token to use for authentication between your proxy and n8n',
       },
       {
         displayName: 'Log Incoming Data',
@@ -77,7 +77,7 @@ export class WhatsAppDirectTrigger implements INodeType {
 
     // Depuración mejorada
     if (logIncomingData) {
-      console.log('WhatsAppDirectTrigger recibió solicitud:', {
+      console.log('WhatsAppDirectTrigger recibió solicitud del proxy:', {
         method: req.method,
         url: req.url,
         headers: req.headers,
@@ -103,7 +103,7 @@ export class WhatsAppDirectTrigger implements INodeType {
       }
     }
 
-    // Process the incoming webhook data
+    // Process the incoming webhook data from proxy
     const body = req.body;
     if (typeof body === 'object' && body !== null) {
       return {
