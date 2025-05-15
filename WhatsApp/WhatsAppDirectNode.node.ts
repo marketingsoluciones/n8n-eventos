@@ -513,7 +513,7 @@ export class WhatsAppDirectNode implements INodeType {
 
     // Validar credenciales
     if (!apiUrl || !apiKey) {
-      throw new NodeOperationError(this.getNode(), 'API URL and API Key are required!');
+      throw new NodeOperationError(this.getNode(), 'API URL and  Acces Toke  are required!');
     }
 
     // Funciones auxiliares para validación y envío de solicitudes
