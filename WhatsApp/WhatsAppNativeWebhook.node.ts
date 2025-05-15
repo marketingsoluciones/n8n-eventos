@@ -25,7 +25,7 @@ export class WhatsAppNativeWebhook implements INodeType {
         name: 'default',
         httpMethod: 'GET,POST',
         responseMode: 'onReceived',
-        path: '',
+        path: '={{$parameter["webhookPath"] || ""}}',
       },
     ],
     properties: [
@@ -37,6 +37,14 @@ export class WhatsAppNativeWebhook implements INodeType {
         required: true,
         description: 'The token to verify webhook subscription from Meta',
       },
+      
+ {
+  displayName: 'Webhook Path',
+  name: 'webhookPath',
+  type: 'string',
+  default: '',
+  description: 'The path for the webhook (without /webhook/ prefix). Leave empty for root path.',
+},
     ],
   };
 
