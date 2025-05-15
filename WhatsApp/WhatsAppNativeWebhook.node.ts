@@ -25,7 +25,11 @@ export class WhatsAppNativeWebhook implements INodeType {
         name: 'default',
         httpMethod: 'GET,POST',
         responseMode: 'onReceived',
-        path: '={{$parameter["webhookPath"] || ""}}',
+       path: '={{$parameter["webhookPath"] || "numero de whatsapp"}}',
+        restartWebhook: true,
+        // Intentar evitar que n8n añada el UUID
+        pathReplace: true,
+
       },
     ],
     properties: [
