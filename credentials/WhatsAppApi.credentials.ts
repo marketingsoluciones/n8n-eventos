@@ -14,7 +14,7 @@ documentationUrl = 'https://developers.facebook.com/docs/whatsapp/cloud-api';
   type: 'generic',
   properties: {
     headers: {
-      'Authorization': 'Bearer {{$credentials.accessToken}}',
+      'Authorization': 'Bearer {{$credentials.apiKey}}',
     },
   },
 };
@@ -23,13 +23,13 @@ properties: INodeProperties[] = [
     displayName: 'API Version',
     name: 'apiVersion',
     type: 'string',
-    default: 'v16.0',
+    default: 'v22.0',
     required: true,
     description: 'The Meta API version to use (e.g., v16.0)',
   },
   {
-    displayName: 'Access Token',
-    name: 'accessToken',
+    displayName: 'Access Token /api Key',
+    name: 'apiKey',
     type: 'string',
     typeOptions: {
       password: true,
