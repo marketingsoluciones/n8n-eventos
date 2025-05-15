@@ -24,12 +24,9 @@ export class WhatsAppNativeWebhook implements INodeType {
       {
         name: 'default',
         httpMethod: 'GET,POST',
-        responseMode: 'onReceived',
-       path: '={{$parameter["webhookPath"] || "numero de whatsapp"}}',
-        restartWebhook: true,
-        // Intentar evitar que n8n añada el UUID
-        pathReplace: true,
-
+        responseMode: 'immediateResponse', // Cambiado de 'onReceived' a 'immediateResponse'
+        path: '={{$parameter["webhookPath"]}}',
+        isFullPath: true, // Añadido para evitar que n8n añada prefijos
       },
     ],
     properties: [
@@ -37,8 +34,9 @@ export class WhatsAppNativeWebhook implements INodeType {
         displayName: 'Webhook Path',
         name: 'webhookPath',
         type: 'string',
-        default: '',
-        description: 'The path for the webhook (without /webhook/ prefix). Leave empty for root path.',
+        default: 'appmeta', // Un valor por defecto más claro
+        required: true,
+        description: 'The path for the webhook (e.g. "appmeta" will be accessible at /webhook/appmeta)',
       },
       {
         displayName: 'Verification Token',
@@ -48,34 +46,24 @@ export class WhatsAppNativeWebhook implements INodeType {
         required: true,
         description: 'The token to verify webhook subscription from Meta',
       },
-      
- 
     ],
   };
 
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     try {
-      // Get request object - simplify like SimpleWebhook
       const req = this.getRequestObject();
-      console.log('WhatsAppNativeWebhook received request:', req.method);
+      console.log('WhatsAppNativeWebhook received request:', req.method, 'URL:', req.url);
       
       // GET request handling (for verification)
       if (req.method === 'GET') {
         console.log('Processing GET request (webhook verification)');
         
-        // If there's a challenge parameter, check verification token and return challenge
-        const mode = req.query['hub.mode'] as string;
-        const token = req.query['hub.verify_token'] as string;
-        const challenge = req.query['hub.challenge'] as string;
+        // Meta/WhatsApp verificación específica
+        const mode = req.query['hub.mode'];
+        const token = req.query['hub.verify_token'];
+        const challenge = req.query['hub.challenge'];
         
-        // Get verification token from node parameters
-        let verificationToken;
-        try {
-          verificationToken = this.getNodeParameter('verificationToken') as string;
-        } catch (error) {
-          console.error('Error getting verification token, using default:', error.message);
-          verificationToken = 'token2022'; // Fallback
-        }
+        const verificationToken = this.getNodeParameter('verificationToken') as string;
         
         console.log('Verification params:', {
           mode,
@@ -87,9 +75,15 @@ export class WhatsAppNativeWebhook implements INodeType {
         if (mode === 'subscribe' && token === verificationToken) {
           console.log('Verification successful, returning challenge:', challenge);
           
-          // CRUCIAL: Devuelve SOLO el challenge como texto plano sin formato JSON
+          // Devolver exactamente el challenge como pide Meta
           return {
-            webhookResponse: challenge,
+            webhookResponse: {
+              statusCode: 200,
+              headers: {
+                'Content-Type': 'text/plain',
+              },
+              body: challenge,
+            },
           };
         } else {
           console.log('Verification failed');
@@ -108,7 +102,10 @@ export class WhatsAppNativeWebhook implements INodeType {
       else if (req.method === 'POST') {
         console.log('Processing POST request (incoming webhook)');
         const body = req.body as IDataObject;
-        console.log('Body received:', JSON.stringify(body).substring(0, 200));
+        
+        // Log solo parte del cuerpo para evitar logs demasiado grandes
+        console.log('Body type:', typeof body);
+        console.log('Body preview:', JSON.stringify(body).substring(0, 200) + '...');
         
         return {
           webhookResponse: {
