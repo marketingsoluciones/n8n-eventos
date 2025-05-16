@@ -27,6 +27,7 @@ export class WhatsAppDirectTrigger implements INodeType {
         httpMethod: 'GET,POST',
         responseMode: 'onReceived',
         path: '',
+         isFullPath: true, 
       },
     ],
     properties: [
