@@ -21,16 +21,44 @@ export class WhatsAppDirectTrigger implements INodeType {
     },
     inputs: [],
     outputs: ['main'],
-    webhooks: [
-      {
-        name: 'default',
-        httpMethod: 'GET,POST',
-        responseMode: 'onReceived',
-         path: 'webhook',  // Especificar explícitamente
-    isFullPath: false,  // Dejar que n8n maneje la estructura
-      },
-    ],
+
+	webhooks: [
+	  {
+	    name: 'default',
+	    httpMethod: 'GET,POST',
+	    responseMode: 'onReceived',
+	    path: '={{$parameter["webhookPath"] || "webhook"}}',
+	    isFullPath: false,
+	  },
+	],
+	
     properties: [
+     {
+    displayName: 'Webhook Path',
+    name: 'webhookPath',
+    type: 'string',
+    default: 'whatsapp',
+    required: true,
+    description: 'Path único para este número de WhatsApp Business',
+    placeholder: 'ej: atencion-general, ventas, soporte-vip',
+  },
+  {
+    displayName: 'WhatsApp Business Number',
+    name: 'businessNumber',
+    type: 'string',
+    default: '',
+    description: 'Tu número de WhatsApp Business que recibe los mensajes',
+    placeholder: '+34 600 111 111',
+  },
+  {
+    displayName: 'Department/Purpose',
+    name: 'department',
+    type: 'string',
+    default: '',
+    description: 'Departamento o propósito de este número',
+    placeholder: 'Atención General',
+  },
+    
       {
         displayName: 'Authentication',
         name: 'authentication',
